@@ -70,5 +70,20 @@ theorem spinner_preserves_style :
       "\u001b[33m*\u001b[0m \u001b[2mloading\u001b[0m" := by
   decide
 
+theorem status_renders_marker_and_message :
+    (renderStatus .warning (Text.plain "slow connection")).plainText =
+      "[warn] slow connection" := by
+  decide
+
+theorem table_renders_fixed_width_rows :
+    (renderTable [5, 5] [[Text.plain "name", Text.plain "state"],
+      [Text.plain "build", Text.plain "done"]]).plainText =
+      "name   state\nbuild  done " := by
+  decide
+
+theorem table_wraps_cells :
+    (renderTable [4] [[Text.plain "hello"]]).plainText = "hell\no   " := by
+  decide
+
 end Widgets
 end TermColor

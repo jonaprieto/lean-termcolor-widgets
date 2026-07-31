@@ -31,6 +31,10 @@ private def withLabel (label : Text) : Text :=
 private def afterFrameLabel (label : Text) : Text :=
   if label.plainText == "" then Text.empty else Text.plain " " ++ label
 
+private def joinTextLines : List Text → Text
+  | [] => Text.empty
+  | first :: rest => rest.foldl (fun result line => result ++ Text.plain "\n" ++ line) first
+
 /-- State displayed by a progress bar. `current` is clamped to `total` when rendered. -/
 structure ProgressState where
   current : Nat := 0
@@ -91,6 +95,28 @@ def spinnerFrame (config : SpinnerConfig) (frame : Nat) : Text :=
 def renderSpinner (config : SpinnerConfig) (state : SpinnerState) : Text :=
   config.prefixText ++ spinnerFrame config state.frame ++ afterFrameLabel state.label ++
     config.suffixText
+
+/-- Common status markers for command-line messages. -/
+inductive StatusKind where
+  | success
+  | info
+  | warning
+  | error
+
+private def statusMarker : StatusKind → Text
+  | .success => Text.styled "[ok]" Style.green
+  | .info => Text.styled "[info]" Style.cyan
+  | .warning => Text.styled "[warn]" Style.yellow
+  | .error => Text.styled "[error]" Style.red
+
+/-- Render a styled status marker followed by a message. -/
+def renderStatus (kind : StatusKind) (message : Text) : Text :=
+  statusMarker kind ++ Text.plain " " ++ message
+
+/-- Render rows as fixed-width, display-aware columns. Cells wrap to their column width. -/
+def renderTable (widths : List Nat) (rows : List (List Text))
+    (gap : Nat := 2) (alignments : List Layout.Alignment := []) : Text :=
+  joinTextLines (rows.map fun row => Layout.columns widths gap row alignments)
 
 end Widgets
 end TermColor
