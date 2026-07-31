@@ -11,17 +11,19 @@ meta if get_config? env = some "dev" then
 
 require «termcolor-layout» from git
   "https://github.com/jonaprieto/lean-termcolor-layout.git"
-  @ "6cb5303f5ab596e6d9e8801076469c0848ddefd3"
+  @ "7e838f6b0903963f2b7de66cf055d8bf89688682"
 
 require «termcolor» from git
-  "https://github.com/jonaprieto/lean-termcolor.git" @ "cad33339fb9e64e251840b8ad4c1a2ba4306b598"
+  "https://github.com/jonaprieto/lean-termcolor.git" @ "117a3570c2f9dea3b3198998e260a3afa9270ea7"
 
 @[default_target]
-lean_lib «TermColorWidgets» where
-  globs := #[.andSubmodules `TermColorWidgets]
+lean_lib «TermColor.Widgets» where
+  roots := #[`TermColor.Widgets]
+  globs := #[.andSubmodules `TermColor.Widgets]
 
-lean_lib «WidgetsProperties» where
-  globs := #[.andSubmodules `WidgetsProperties]
+lean_lib «TermColor.Widgets.Properties» where
+  roots := #[`TermColor.Widgets.Properties]
+  globs := #[.andSubmodules `TermColor.Widgets.Properties]
 
 lean_exe «demo» where
   root := `Demo

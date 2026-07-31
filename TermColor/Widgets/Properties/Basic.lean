@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Jonathan Prieto-Cubides
 -/
 
-import TermColorWidgets
+import TermColor.Widgets
 
 set_option maxRecDepth 10000
 

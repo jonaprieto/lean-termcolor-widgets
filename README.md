@@ -12,7 +12,7 @@ The package depends on [`termcolor-layout`](https://github.com/jonaprieto/lean-t
 styled text and display-width-aware layout.
 
 ```lean
-import TermColorWidgets
+import TermColor.Widgets
 
 open TermColor
 open TermColor.Widgets
@@ -40,11 +40,11 @@ an empty frame.
 Build and run the full demo:
 
 ```sh
-lake build TermColorWidgets WidgetsProperties demo
+lake build TermColor.Widgets TermColor.Widgets.Properties demo
 lake exe demo
 ```
 
-`WidgetsProperties` contains machine-checked rendering examples. `examples/Demo.lean` exercises
+`TermColor.Widgets.Properties` contains machine-checked rendering examples. `examples/Demo.lean` exercises
 default and custom progress bars, styled labels and bars, hidden percentages, zero and overflow
 totals, indeterminate progress, default and custom spinners, frame wrapping, status messages,
 fixed-width tables, and plain rendering.

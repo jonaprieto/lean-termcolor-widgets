@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Jonathan Prieto-Cubides
 -/
 
-import TermColorLayout
+import TermColor.Layout
 
 /-!
 # TermColor.Widgets.Basic: pure progress and spinner rendering
