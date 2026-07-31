@@ -1,9 +1,13 @@
 # termcolor-widgets
 
+[![CI](https://github.com/jonaprieto/lean-termcolor-widgets/actions/workflows/ci.yml/badge.svg)](https://github.com/jonaprieto/lean-termcolor-widgets/actions/workflows/ci.yml)
+[![Lean 4](https://img.shields.io/badge/Lean%204-library-5f5f5f)](lean-toolchain)
+[![License](https://img.shields.io/badge/license-Apache--2.0-green)](LICENSE)
+
 Pure progress bars and spinners for Lean 4. Rendering returns styled `TermColor.Text`; the caller
 owns timing, terminal size, and output. There is no IO, cursor control, timer, or FFI dependency.
 
-The package depends on [`termcolor-layout`](https://github.com/jonaprieto/termcolor-layout) for
+The package depends on [`termcolor-layout`](https://github.com/jonaprieto/lean-termcolor-layout) for
 styled text and display-width-aware layout.
 
 ```lean

@@ -11,7 +11,7 @@
    "inputRev": "cad33339fb9e64e251840b8ad4c1a2ba4306b598",
    "inherited": false,
    "configFile": "lakefile.lean"},
-  {"url": "https://github.com/jonaprieto/termcolor-layout.git",
+  {"url": "https://github.com/jonaprieto/lean-termcolor-layout.git",
    "type": "git",
    "subDir": null,
    "scope": "",
