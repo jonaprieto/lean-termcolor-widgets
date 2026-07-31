@@ -45,13 +45,13 @@ structure ProgressState where
 suffixes. -/
 structure ProgressConfig where
   width : Nat := 30
-  indeterminateWidth : Nat := 8
   filledChar : Char := '━'
   emptyChar : Char := '─'
   filledStyle : Style := Style.green
   emptyStyle : Style := Style.dim
   percentageStyle : Style := {}
   showPercentage : Bool := true
+  indeterminateWidth : Nat := 8
 
 /-- Percentage shown by a progress bar. Zero total means no work remains, so it is complete. -/
 def progressPercent (state : ProgressState) : Nat :=
