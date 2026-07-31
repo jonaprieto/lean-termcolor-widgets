@@ -23,6 +23,12 @@ theorem progress_rounds_down :
     (progressBar { width := 5 } { current := 1, total := 3 }).plainText = "[━────] 33%" := by
   decide
 
+theorem progress_wide_glyph_keeps_width :
+    let text := progressBar { width := 5, filledChar := '界', emptyChar := '.' }
+      { current := 1, total := 2 }
+    text.plainText = "[界...] 50%" ∧ text.width = 11 := by
+  decide
+
 theorem progress_can_hide_percentage :
     (progressBar { width := 5, showPercentage := false } { current := 2, total := 4 }).plainText =
       "[━━───]" := by

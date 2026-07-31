@@ -24,8 +24,9 @@ def spinner : Text :=
 #eval spinner.plainText -- ⠸ working
 ```
 
-`ProgressConfig.width` is the bar width excluding brackets, labels, and the percentage suffix.
-Progress values are clamped to 100%; a zero total is treated as completed work and renders 100%.
+`ProgressConfig.width` is the display-cell width excluding brackets, labels, and the percentage
+suffix. Wide or combining custom glyphs are padded to keep that width stable. Progress values are
+clamped to 100%; a zero total is treated as completed work and renders 100%.
 Spinner frame indices wrap around the configured list, while an empty frame list renders safely as
 an empty frame.
 

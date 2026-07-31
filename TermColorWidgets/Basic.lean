@@ -15,8 +15,15 @@ Widgets own state-to-text rendering. A caller owns timers, terminal width, and o
 namespace TermColor
 namespace Widgets
 
-private def repeatStyled (character : Char) (style : Style) (count : Nat) : Text :=
-  Text.styled (String.ofList (List.replicate count character)) style
+private def repeatToWidth (character : Char) (style : Style) (width : Nat) : Text :=
+  let characterWidth := Layout.charWidth character
+  if characterWidth == 0 then
+    Text.styled (String.ofList (List.replicate width ' ')) style
+  else
+    let count := width / characterWidth
+    let used := count * characterWidth
+    let glyphs := List.replicate count character ++ List.replicate (width - used) ' '
+    Text.styled (String.ofList glyphs) style
 
 private def withLabel (label : Text) : Text :=
   if label.plainText == "" then Text.empty else label ++ Text.plain " "
@@ -30,7 +37,8 @@ structure ProgressState where
   total : Nat := 0
   label : Text := Text.empty
 
-/-- Rendering choices for a progress bar. `width` is the bar width without brackets or suffixes. -/
+/-- Rendering choices for a progress bar. `width` is the display width without brackets or
+suffixes. -/
 structure ProgressConfig where
   width : Nat := 30
   filledChar : Char := '━'
@@ -50,8 +58,8 @@ def progressBar (config : ProgressConfig) (state : ProgressState) : Text :=
   let filled := config.width * percent / 100
   let empty := config.width - filled
   let bar := Text.plain "[" ++
-    repeatStyled config.filledChar config.filledStyle filled ++
-    repeatStyled config.emptyChar config.emptyStyle empty ++ Text.plain "]"
+    repeatToWidth config.filledChar config.filledStyle filled ++
+    repeatToWidth config.emptyChar config.emptyStyle empty ++ Text.plain "]"
   let suffix := if config.showPercentage then
       Text.plain " " ++ Text.styled (toString percent ++ "%") config.percentageStyle
     else Text.empty

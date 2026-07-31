@@ -26,6 +26,9 @@ def main : IO Unit := do
     { current := 3, total := 10, label := Text.styled "compile" Style.yellow })
   renderLine (progressBar { width := 28, showPercentage := false }
     { current := 5, total := 10, label := Text.styled "quiet" Style.dim })
+  renderLine (progressBar
+    { width := 28, filledChar := '#', emptyChar := '.', percentageStyle := Style.bold }
+    { current := 2, total := 10, label := Text.styled "custom glyphs" Style.cyan })
   renderLine (progressBar { width := 28 }
     { current := 0, total := 0, label := Text.styled "nothing to do" Style.green })
   renderLine (progressBar { width := 28 }
