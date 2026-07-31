@@ -44,6 +44,13 @@ and forth across the bar; advance `IndeterminateProgressState.frame` from the ca
 Spinner frame indices wrap around the configured list, while an empty frame list renders safely as
 an empty frame.
 
+## Demo
+
+The demo renders known-total and indeterminate progress bars, spinners, status messages, tables,
+and plain-text fallback output.
+
+![termcolor-widgets demo output](assets/demo.png)
+
 Build and run the full demo:
 
 ```sh
