@@ -18,7 +18,7 @@ private def renderLine (text : Text) : IO Unit :=
 
 def main : IO Unit := do
   renderLine (Text.styled "termcolor-widgets" (Style.bold <+> Style.fg (.indexed 45)))
-  renderLine (Text.plain "Pure progress and spinner rendering")
+  renderLine (Text.plain "Pure CLI display rendering")
   renderLine (heading "progress bars")
   renderLine (progressBar { width := 28 }
     { current := 7, total := 10, label := Text.styled "download" Style.cyan })
@@ -43,5 +43,15 @@ def main : IO Unit := do
     { frame := 6, label := Text.styled "custom frames" Style.bold })
   renderLine (renderSpinner { frames := [Text.plain "|", Text.plain "/", Text.plain "-"] }
     { frame := 10, label := Text.plain "frame indices wrap" })
+  renderLine (heading "status messages")
+  renderLine (renderStatus .success (Text.plain "build complete"))
+  renderLine (renderStatus .warning (Text.plain "using a fallback"))
+  renderLine (renderStatus .error (Text.plain "build failed"))
+  renderLine (heading "tables")
+  renderLine (renderTable [14, 10, 8]
+    [[Text.styled "task" Style.bold, Text.styled "status" Style.bold,
+      Text.styled "time" Style.bold],
+     [Text.plain "download", Text.styled "done" Style.green, Text.plain "2.1s"],
+     [Text.plain "compile", Text.styled "running" Style.yellow, Text.plain "..."]])
   renderLine (heading "plain rendering")
   renderLine (Text.plain "Text.plainText removes styles while preserving visible output.")

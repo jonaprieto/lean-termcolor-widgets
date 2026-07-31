@@ -4,8 +4,9 @@
 [![Lean 4](https://img.shields.io/badge/Lean%204-library-5f5f5f)](lean-toolchain)
 [![License](https://img.shields.io/badge/license-Apache--2.0-green)](LICENSE)
 
-Pure progress bars and spinners for Lean 4. Rendering returns styled `TermColor.Text`; the caller
-owns timing, terminal size, and output. There is no IO, cursor control, timer, or FFI dependency.
+Pure CLI display widgets for Lean 4: progress bars, spinners, status messages, and tables.
+Rendering returns styled `TermColor.Text`; the caller owns timing, terminal size, and output.
+There is no IO, cursor control, timer, or FFI dependency.
 
 The package depends on [`termcolor-layout`](https://github.com/jonaprieto/lean-termcolor-layout) for
 styled text and display-width-aware layout.
@@ -43,7 +44,8 @@ lake exe demo
 
 `WidgetsProperties` contains machine-checked rendering examples. `examples/Demo.lean` exercises
 default and custom progress bars, styled labels and bars, hidden percentages, zero and overflow
-totals, default and custom spinners, frame wrapping, and plain rendering.
+totals, default and custom spinners, frame wrapping, status messages, fixed-width tables, and
+plain rendering.
 
 ## License
 

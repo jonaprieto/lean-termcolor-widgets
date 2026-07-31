@@ -9,6 +9,6 @@ import TermColorWidgets.Basic
 /-!
 # termcolor-widgets
 
-Pure progress bars and spinners rendered as `TermColor.Text`. This module performs no terminal
-IO, timing, cursor control, or FFI.
+Pure CLI display widgets rendered as `TermColor.Text`. This module performs no terminal IO,
+timing, cursor control, or FFI.
 -/
