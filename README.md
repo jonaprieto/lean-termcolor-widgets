@@ -11,6 +11,13 @@ There is no IO, cursor control, timer, or FFI dependency.
 The package depends on [`termcolor-layout`](https://github.com/jonaprieto/lean-termcolor-layout) for
 styled text and display-width-aware layout.
 
+## Widgets
+
+`progressBar` covers known totals, while `indeterminateProgressBar` gives unknown-duration work a
+back-and-forth activity bar. `renderSpinner`, `statusMessage`, and `table` cover the other common
+CLI states. Every widget is a pure `Text` value, so applications choose the clock, renderer, output
+target, and terminal update policy.
+
 ```lean
 import TermColor.Widgets
 
@@ -44,10 +51,10 @@ lake build TermColor.Widgets TermColor.Widgets.Properties demo
 lake exe demo
 ```
 
-`TermColor.Widgets.Properties` contains machine-checked rendering examples. `examples/Demo.lean` exercises
-default and custom progress bars, styled labels and bars, hidden percentages, zero and overflow
-totals, indeterminate progress, default and custom spinners, frame wrapping, status messages,
-fixed-width tables, and plain rendering.
+`TermColor.Widgets.Properties` contains machine-checked rendering examples. `examples/Demo.lean`
+exercises default and custom progress bars, styled labels and bars, hidden percentages, zero and
+overflow totals, indeterminate progress, default and custom spinners, frame wrapping, status
+messages, fixed-width tables, and plain rendering.
 
 ## License
 

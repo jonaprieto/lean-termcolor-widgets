@@ -14,7 +14,7 @@ require «termcolor-layout» from git
   @ "7e838f6b0903963f2b7de66cf055d8bf89688682"
 
 require «termcolor» from git
-  "https://github.com/jonaprieto/lean-termcolor.git" @ "117a3570c2f9dea3b3198998e260a3afa9270ea7"
+  "https://github.com/jonaprieto/lean-termcolor.git" @ "8d311ca"
 
 @[default_target]
 lean_lib «TermColor.Widgets» where
