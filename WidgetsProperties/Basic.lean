@@ -34,6 +34,18 @@ theorem progress_can_hide_percentage :
       "[━━───]" := by
   decide
 
+theorem indeterminate_progress_moves_forward_and_back :
+    let config : ProgressConfig := { width := 8, indeterminateWidth := 3 }
+    indeterminateProgressOffset config { frame := 2 } = 2 ∧
+      indeterminateProgressOffset config { frame := 5 } = 5 ∧
+      indeterminateProgressOffset config { frame := 8 } = 2 := by
+  decide
+
+theorem indeterminate_progress_renders_without_percentage :
+    (indeterminateProgressBar { width := 8, indeterminateWidth := 3 }
+      { frame := 2 }).plainText = "[──━━━───]" := by
+  decide
+
 theorem progress_preserves_label_style :
     Text.render RenderTarget.ansi16
       (progressBar { width := 2 }

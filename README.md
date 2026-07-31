@@ -32,6 +32,8 @@ def spinner : Text :=
 `ProgressConfig.width` is the display-cell width excluding brackets, labels, and the percentage
 suffix. Wide or combining custom glyphs are padded to keep that width stable. Progress values are
 clamped to 100%; a zero total is treated as completed work and renders 100%.
+For work with no known total, `indeterminateProgressBar` renders a filled segment that moves back
+and forth across the bar; advance `IndeterminateProgressState.frame` from the caller.
 Spinner frame indices wrap around the configured list, while an empty frame list renders safely as
 an empty frame.
 
@@ -44,8 +46,8 @@ lake exe demo
 
 `WidgetsProperties` contains machine-checked rendering examples. `examples/Demo.lean` exercises
 default and custom progress bars, styled labels and bars, hidden percentages, zero and overflow
-totals, default and custom spinners, frame wrapping, status messages, fixed-width tables, and
-plain rendering.
+totals, indeterminate progress, default and custom spinners, frame wrapping, status messages,
+fixed-width tables, and plain rendering.
 
 ## License
 

@@ -45,6 +45,7 @@ structure ProgressState where
 suffixes. -/
 structure ProgressConfig where
   width : Nat := 30
+  indeterminateWidth : Nat := 8
   filledChar : Char := '━'
   emptyChar : Char := '─'
   filledStyle : Style := Style.green
@@ -68,6 +69,34 @@ def progressBar (config : ProgressConfig) (state : ProgressState) : Text :=
       Text.plain " " ++ Text.styled (toString percent ++ "%") config.percentageStyle
     else Text.empty
   withLabel state.label ++ bar ++ suffix
+
+/-- State displayed by an indeterminate progress bar. The frame moves back and forth. -/
+structure IndeterminateProgressState where
+  frame : Nat := 0
+  label : Text := Text.empty
+
+/-- Moving segment offset for an indeterminate progress bar. -/
+def indeterminateProgressOffset (config : ProgressConfig)
+    (state : IndeterminateProgressState) : Nat :=
+  let segmentWidth := min config.width (max 1 config.indeterminateWidth)
+  let span := config.width - segmentWidth
+  if span == 0 then 0
+  else
+    let position := state.frame % (2 * span)
+    if position ≤ span then position else 2 * span - position
+
+/-- Render a progress bar for work with no known total. The filled segment bounces at both ends.
+The caller advances `state.frame`. -/
+def indeterminateProgressBar (config : ProgressConfig)
+    (state : IndeterminateProgressState) : Text :=
+  let segmentWidth := min config.width (max 1 config.indeterminateWidth)
+  let offset := indeterminateProgressOffset config state
+  let trailing := config.width - offset - segmentWidth
+  let bar := Text.plain "[" ++
+    repeatToWidth config.emptyChar config.emptyStyle offset ++
+    repeatToWidth config.filledChar config.filledStyle segmentWidth ++
+    repeatToWidth config.emptyChar config.emptyStyle trailing ++ Text.plain "]"
+  withLabel state.label ++ bar
 
 /-- Default braille spinner frames. The caller advances the frame index. -/
 def defaultSpinnerFrames : List Text :=

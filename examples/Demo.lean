@@ -33,6 +33,8 @@ def main : IO Unit := do
     { current := 0, total := 0, label := Text.styled "nothing to do" Style.green })
   renderLine (progressBar { width := 28 }
     { current := 12, total := 10, label := Text.styled "clamped" Style.magenta })
+  renderLine (indeterminateProgressBar { width := 28, indeterminateWidth := 7 }
+    { frame := 8, label := Text.styled "unknown progress" Style.cyan })
   renderLine (heading "spinners")
   renderLine (renderSpinner { prefixText := Text.plain "  " }
     { frame := 3, label := Text.styled "default braille frame" Style.green })
