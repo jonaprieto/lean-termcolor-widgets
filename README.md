@@ -14,7 +14,7 @@ styled text and display-width-aware layout.
 ## Widgets
 
 `progressBar` covers known totals, while `indeterminateProgressBar` gives unknown-duration work a
-back-and-forth activity bar. `renderSpinner`, `statusMessage`, and `table` cover the other common
+back-and-forth activity bar. `renderSpinner`, `renderStatus`, and `renderTable` cover the other common
 CLI states. Every widget is a pure `Text` value, so applications choose the clock, renderer, output
 target, and terminal update policy.
 

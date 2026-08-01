@@ -5,6 +5,7 @@ Authors: Jonathan Prieto-Cubides
 -/
 
 import TermColor.Widgets.Properties.Basic
+import TermColor.Widgets.Properties.Examples
 
 /-!
 # termcolor-widgets properties

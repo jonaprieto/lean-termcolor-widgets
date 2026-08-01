@@ -26,20 +26,19 @@ private def repeatToWidth (character : Char) (style : Style) (width : Nat) : Tex
     Text.styled (String.ofList glyphs) style
 
 private def withLabel (label : Text) : Text :=
-  if label.plainText == "" then Text.empty else label ++ Text.plain " "
+  if label.segments.all (·.text.isEmpty) then Text.empty else label ++ Text.plain " "
 
 private def afterFrameLabel (label : Text) : Text :=
-  if label.plainText == "" then Text.empty else Text.plain " " ++ label
-
-private def joinTextLines : List Text → Text
-  | [] => Text.empty
-  | first :: rest => rest.foldl (fun result line => result ++ Text.plain "\n" ++ line) first
+  if label.segments.all (·.text.isEmpty) then Text.empty else Text.plain " " ++ label
 
 /-- State displayed by a progress bar. `current` is clamped to `total` when rendered. -/
 structure ProgressState where
   current : Nat := 0
   total : Nat := 0
   label : Text := Text.empty
+  deriving BEq, DecidableEq, Repr
+
+instance : Inhabited ProgressState := ⟨{}⟩
 
 /-- Rendering choices for a progress bar. `width` is the display width without brackets or
 suffixes. -/
@@ -52,6 +51,9 @@ structure ProgressConfig where
   percentageStyle : Style := {}
   showPercentage : Bool := true
   indeterminateWidth : Nat := 8
+  deriving BEq, DecidableEq, Repr
+
+instance : Inhabited ProgressConfig := ⟨{}⟩
 
 /-- Percentage shown by a progress bar. Zero total means no work remains, so it is complete. -/
 def progressPercent (state : ProgressState) : Nat :=
@@ -74,6 +76,9 @@ def progressBar (config : ProgressConfig) (state : ProgressState) : Text :=
 structure IndeterminateProgressState where
   frame : Nat := 0
   label : Text := Text.empty
+  deriving BEq, DecidableEq, Repr
+
+instance : Inhabited IndeterminateProgressState := ⟨{}⟩
 
 /-- Moving segment offset for an indeterminate progress bar. -/
 def indeterminateProgressOffset (config : ProgressConfig)
@@ -107,12 +112,18 @@ def defaultSpinnerFrames : List Text :=
 structure SpinnerState where
   frame : Nat := 0
   label : Text := Text.empty
+  deriving BEq, DecidableEq, Repr
+
+instance : Inhabited SpinnerState := ⟨{}⟩
 
 /-- Rendering choices for a spinner. Empty frame lists render as an empty frame safely. -/
 structure SpinnerConfig where
   frames : List Text := defaultSpinnerFrames
   prefixText : Text := Text.empty
   suffixText : Text := Text.empty
+  deriving BEq, DecidableEq, Repr
+
+instance : Inhabited SpinnerConfig := ⟨{}⟩
 
 /-- Select a spinner frame, wrapping around the configured frame list. -/
 def spinnerFrame (config : SpinnerConfig) (frame : Nat) : Text :=
@@ -131,6 +142,7 @@ inductive StatusKind where
   | info
   | warning
   | error
+  deriving BEq, DecidableEq, Repr, Inhabited
 
 private def statusMarker : StatusKind → Text
   | .success => Text.styled "[ok]" Style.green
@@ -145,7 +157,7 @@ def renderStatus (kind : StatusKind) (message : Text) : Text :=
 /-- Render rows as fixed-width, display-aware columns. Cells wrap to their column width. -/
 def renderTable (widths : List Nat) (rows : List (List Text))
     (gap : Nat := 2) (alignments : List Layout.Alignment := []) : Text :=
-  joinTextLines (rows.map fun row => Layout.columns widths gap row alignments)
+  Layout.joinLines (rows.map fun row => Layout.columns widths gap row alignments)
 
 end Widgets
 end TermColor
