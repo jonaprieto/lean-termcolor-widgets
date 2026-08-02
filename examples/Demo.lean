@@ -57,7 +57,7 @@ def main : IO Unit := do
       Text.styled "time" Style.bold],
      [Text.plain "download", Text.styled "done" Style.green, Text.plain "2.1s"],
      [Text.plain "compile", Text.styled "running" Style.yellow, Text.plain "..."]])
-  renderLine target (heading "interactive controls")
+  renderLine target (heading "pure controls")
   let nameConfig : TextInputConfig :=
     { width := 16, maxLength := 16, label := Text.plain "name: " }
   let name := updateTextInput nameConfig (.char 'L') {}
