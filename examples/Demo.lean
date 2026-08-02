@@ -55,11 +55,13 @@ def main : IO Unit := do
       , Text.styled "◑" (Style.fg demoPalette.cyan)
       , Text.styled "◒" (Style.fg demoPalette.cyan)]
       prefixText := Text.plain "  ", suffixText := Text.plain " ..." }
-    { frame := 6, label := Text.styled "custom frames" (Style.bold <+> Style.fg demoPalette.purple) })
+    { frame := 6
+      , label := Text.styled "custom frames" (Style.bold <+> Style.fg demoPalette.purple) })
   renderLine target (renderSpinner { frames := [Text.plain "|", Text.plain "/", Text.plain "-"] }
     { frame := 10, label := Text.plain "frame indices wrap" })
   renderLine target (heading "status messages")
-  renderLine target (renderStatus .success (Text.styled "build complete" (Style.fg demoPalette.green)))
+  renderLine target (renderStatus .success
+    (Text.styled "build complete" (Style.fg demoPalette.green)))
   renderLine target (renderStatus .warning
     (Text.styled "using a fallback" (Style.fg demoPalette.yellow)))
   renderLine target (renderStatus .error (Text.styled "build failed" (Style.fg demoPalette.red)))
@@ -69,7 +71,8 @@ def main : IO Unit := do
       , Text.styled "status" (Style.bold <+> Style.fg demoPalette.purple)
       , Text.styled "time" (Style.bold <+> Style.fg demoPalette.purple)]
      , [Text.plain "download", Text.styled "done" (Style.fg demoPalette.green), Text.plain "2.1s"]
-     , [Text.plain "compile", Text.styled "running" (Style.fg demoPalette.yellow), Text.plain "..."]])
+     , [Text.plain "compile", Text.styled "running" (Style.fg demoPalette.yellow),
+        Text.plain "..."]])
   renderLine target (heading "pure controls")
   let nameConfig : TextInputConfig :=
     { width := 16, maxLength := 16

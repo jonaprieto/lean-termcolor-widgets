@@ -238,7 +238,8 @@ private def inputContent (config : TextInputConfig) (state : TextInputState)
   let dropIndex := if focused && cursor < characters.length then Nat.succ cursor else cursor
   let after := String.ofList (characters.drop dropIndex)
   let cursorText := if focused then
-      let style := Style.combine config.textStyle config.cursorStyle
+      let style := Style.combine config.textStyle
+        config.cursorStyle
       Text.styled (String.singleton cursorCharacter) style
     else Text.empty
   Text.styled before config.textStyle ++
