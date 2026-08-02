@@ -68,6 +68,11 @@ lake build TermColor.Widgets TermColor.Widgets.Properties demo
 lake exe demo
 ```
 
+When run from a TTY, the demo enters an interactive control loop. Use `tab` to move focus,
+`left`/`right`/`up`/`down` to edit controls, `text VALUE` to replace the name, and `q` to quit.
+Pipes, CI, and tests automatically use the one-shot renderer; force that mode with
+`TERMCOLOR_WIDGETS_NONINTERACTIVE=1 lake exe demo`.
+
 `TermColor.Widgets.Properties` contains machine-checked rendering examples. `examples/Demo.lean`
 exercises default and custom progress bars, styled labels and bars, hidden percentages, zero and
 overflow totals, indeterminate progress, default and custom spinners, frame wrapping, status

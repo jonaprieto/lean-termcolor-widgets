@@ -17,8 +17,76 @@ private def heading (title : String) : Text :=
 private def renderLine (target : RenderTarget) (text : Text) : IO Unit :=
   IO.print (Text.render target (text ++ Text.plain "\n"))
 
-def main : IO Unit := do
-  let target ← TermColor.target
+private def nameConfig : TextInputConfig :=
+  { width := 16, maxLength := 16, label := Text.plain "name: " }
+
+private def sliderConfig : SliderConfig :=
+  { width := 12, label := Text.plain "volume: " }
+
+private structure DemoState where
+  name : TextInputState := {}
+  volume : SliderState := { value := 5 }
+  enabled : CheckboxState := {}
+  focus : Nat := 0
+
+private def renderForm (target : RenderTarget) (state : DemoState) : IO Unit := do
+  renderLine target (heading "interactive controls")
+  renderLine target (renderTextInput nameConfig state.name (state.focus == 0))
+  renderLine target (renderSlider sliderConfig state.volume)
+  renderLine target (renderCheckbox { label := Text.plain "enabled" } state.enabled)
+  renderLine target (renderButton (Text.plain "save") (state.focus == 3))
+
+private def commandKey (input : String) : Option Key :=
+  match input.trimAscii.toString with
+  | "tab" => some .tab
+  | "left" => some .left
+  | "right" => some .right
+  | "up" => some .up
+  | "down" => some .down
+  | "backspace" => some .backspace
+  | "delete" => some .delete
+  | "space" => some (.char ' ')
+  | "enter" => some .enter
+  | command =>
+      match command.toList with
+      | [character] => some (.char character)
+      | _ => none
+
+private def applyKey (state : DemoState) (key : Key) : DemoState × Bool :=
+  match key with
+  | .tab => ({ state with focus := (state.focus + 1) % 4 }, false)
+  | _ =>
+      match state.focus with
+      | 0 => ({ state with name := updateTextInput nameConfig key state.name }, false)
+      | 1 => ({ state with volume := updateSlider sliderConfig key state.volume }, false)
+      | 2 => ({ state with enabled := updateCheckbox key state.enabled }, false)
+      | _ => (state, buttonActivated key)
+
+private def interactiveDemo (target : RenderTarget) : IO Unit := do
+  IO.println "Interactive mode. Commands: tab, left, right, up, down, backspace, space, enter."
+  IO.println "Use `text VALUE` to replace the name, `q` to quit."
+  let mut state : DemoState := {}
+  let mut finished := false
+  while !finished do
+    renderForm target state
+    IO.print "command> "
+    let input ← (← IO.getStdin).getLine
+    let command := input.trimAscii.toString
+    if command == "q" then
+      finished := true
+    else if command.startsWith "text " then
+      let value := (command.drop 5).toString
+      state := { state with name := { value, cursor := value.toList.length } }
+    else
+      match commandKey input with
+      | some key =>
+          let (next, activated) := applyKey state key
+          state := next
+          finished := activated
+      | none => IO.println "Unknown command. Use `tab`, `text VALUE`, or `q`."
+  IO.println "Done."
+
+private def renderDemo (target : RenderTarget) : IO Unit := do
   renderLine target (Text.styled "termcolor-widgets" (Style.bold <+> Style.fg (.indexed 45)))
   renderLine target (Text.plain "Pure CLI display rendering")
   renderLine target (heading "progress bars")
@@ -58,18 +126,22 @@ def main : IO Unit := do
      [Text.plain "download", Text.styled "done" Style.green, Text.plain "2.1s"],
      [Text.plain "compile", Text.styled "running" Style.yellow, Text.plain "..."]])
   renderLine target (heading "interactive controls")
-  let nameConfig : TextInputConfig :=
-    { width := 16, maxLength := 16, label := Text.plain "name: " }
-  let name := updateTextInput nameConfig (.char 'L') {}
-  let name := updateTextInput nameConfig (.char 'e') name
-  let name := updateTextInput nameConfig (.char 'a') name
-  renderLine target (renderTextInput nameConfig name true)
-  let sliderConfig : SliderConfig :=
-    { width := 12, label := Text.plain "volume: " }
-  let volume := updateSlider sliderConfig .right { value := 6 }
-  renderLine target (renderSlider sliderConfig volume)
-  let enabled := updateCheckbox (.char ' ') {}
-  renderLine target (renderCheckbox { label := Text.plain "enabled" } enabled)
+  let previewState : DemoState :=
+    { name := { value := "Lea", cursor := 3 }, volume := { value := 7 },
+      enabled := { checked := true } }
+  renderLine target (renderTextInput nameConfig previewState.name true)
+  renderLine target (renderSlider sliderConfig previewState.volume)
+  renderLine target (renderCheckbox { label := Text.plain "enabled" } previewState.enabled)
   renderLine target (renderButton (Text.plain "save") true)
   renderLine target (heading "plain rendering")
   renderLine target (Text.plain "Text.plainText removes styles while preserving visible output.")
+
+def main : IO Unit := do
+  let target ← TermColor.target
+  let stdinIsTty ← (← IO.getStdin).isTty
+  let forcedNonInteractive := (← IO.getEnv "TERMCOLOR_WIDGETS_NONINTERACTIVE").isSome
+  let runningInCi := (← IO.getEnv "CI").isSome
+  if stdinIsTty && !forcedNonInteractive && !runningInCi then
+    interactiveDemo target
+  else
+    renderDemo target
