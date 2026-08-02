@@ -17,97 +17,8 @@ private def heading (title : String) : Text :=
 private def renderLine (target : RenderTarget) (text : Text) : IO Unit :=
   IO.print (Text.render target (text ++ Text.plain "\n"))
 
-private def nameConfig : TextInputConfig :=
-  { width := 16, maxLength := 16, label := Text.plain "name: " }
-
-private def sliderConfig : SliderConfig :=
-  { width := 12, label := Text.plain "volume: " }
-
-private structure DemoState where
-  name : TextInputState := {}
-  volume : SliderState := { value := 5 }
-  enabled : CheckboxState := {}
-  focus : Nat := 0
-
-private def renderForm (target : RenderTarget) (state : DemoState) : IO Unit := do
-  renderLine target (heading "interactive controls")
-  let marker := fun (index : Nat) => Text.plain (if state.focus == index then "> " else "  ")
-  renderLine target (marker 0 ++ renderTextInput nameConfig state.name (state.focus == 0))
-  renderLine target (marker 1 ++ renderSlider sliderConfig state.volume)
-  renderLine target (marker 2 ++ renderCheckbox { label := Text.plain "enabled" } state.enabled)
-  renderLine target (marker 3 ++ renderButton (Text.plain "save") (state.focus == 3))
-  renderLine target (Text.styled "Tab focus  •  arrows edit  •  Enter save  •  Esc quit" Style.dim)
-
-private def applyKey (state : DemoState) (key : Key) : DemoState × Bool :=
-  match key with
-  | .tab => ({ state with focus := (state.focus + 1) % 4 }, false)
-  | _ =>
-      match state.focus with
-      | 0 => ({ state with name := updateTextInput nameConfig key state.name }, false)
-      | 1 => ({ state with volume := updateSlider sliderConfig key state.volume }, false)
-      | 2 => ({ state with enabled := updateCheckbox key state.enabled }, false)
-      | _ => (state, buttonActivated key)
-
-private def stty (command : String) : IO IO.Process.Output :=
-  IO.Process.output { cmd := "sh", args := #["-c", command] }
-
-private def withRawInput (action : IO Unit) : IO Unit := do
-  let saved ← stty "stty -g < /dev/tty"
-  if saved.exitCode != 0 then
-    throw (IO.userError "could not read terminal settings")
-  let configured ← stty "stty -echo -icanon min 1 time 1 < /dev/tty"
-  if configured.exitCode != 0 then
-    throw (IO.userError "could not configure raw terminal input")
-  try
-    action
-  finally
-    let restore := "stty " ++ saved.stdout.trimAscii.toString ++ " < /dev/tty"
-    let _ ← stty restore
-
-private def readByte : IO (Option UInt8) := do
-  let bytes ← (← IO.getStdin).read 1
-  pure bytes[0]?
-
-private def readKey : IO (Option Key) := do
-  match ← readByte with
-  | none => pure none
-  | some 27 =>
-      match ← readByte with
-      | some 91 =>
-          match ← readByte with
-          | some 65 => pure (some .up)
-          | some 66 => pure (some .down)
-          | some 67 => pure (some .right)
-          | some 68 => pure (some .left)
-          | _ => pure (some .escape)
-      | _ => pure (some .escape)
-  | some 13 | some 10 => pure (some .enter)
-  | some 8 | some 127 => pure (some .backspace)
-  | some 9 => pure (some .tab)
-  | some byte =>
-      if byte.toNat < 128 then
-        pure (some (.char (Char.ofNat byte.toNat)))
-      else
-        pure none
-
-private def interactiveDemo (target : RenderTarget) : IO Unit := withRawInput do
-  IO.print "\u001b[?25l"
-  try
-    let mut state : DemoState := {}
-    let mut finished := false
-    while !finished do
-      IO.print "\u001b[2J\u001b[H"
-      renderForm target state
-      match ← readKey with
-      | none | some .escape => finished := true
-      | some key =>
-          let (next, activated) := applyKey state key
-          state := next
-          finished := activated
-  finally
-    IO.print "\u001b[?25h\u001b[2J\u001b[H"
-
-private def renderDemo (target : RenderTarget) : IO Unit := do
+def main : IO Unit := do
+  let target ← TermColor.target
   renderLine target (Text.styled "termcolor-widgets" (Style.bold <+> Style.fg (.indexed 45)))
   renderLine target (Text.plain "Pure CLI display rendering")
   renderLine target (heading "progress bars")
@@ -147,22 +58,18 @@ private def renderDemo (target : RenderTarget) : IO Unit := do
      [Text.plain "download", Text.styled "done" Style.green, Text.plain "2.1s"],
      [Text.plain "compile", Text.styled "running" Style.yellow, Text.plain "..."]])
   renderLine target (heading "interactive controls")
-  let previewState : DemoState :=
-    { name := { value := "Lea", cursor := 3 }, volume := { value := 7 },
-      enabled := { checked := true } }
-  renderLine target (renderTextInput nameConfig previewState.name true)
-  renderLine target (renderSlider sliderConfig previewState.volume)
-  renderLine target (renderCheckbox { label := Text.plain "enabled" } previewState.enabled)
+  let nameConfig : TextInputConfig :=
+    { width := 16, maxLength := 16, label := Text.plain "name: " }
+  let name := updateTextInput nameConfig (.char 'L') {}
+  let name := updateTextInput nameConfig (.char 'e') name
+  let name := updateTextInput nameConfig (.char 'a') name
+  renderLine target (renderTextInput nameConfig name true)
+  let sliderConfig : SliderConfig :=
+    { width := 12, label := Text.plain "volume: " }
+  let volume := updateSlider sliderConfig .right { value := 6 }
+  renderLine target (renderSlider sliderConfig volume)
+  let enabled := updateCheckbox (.char ' ') {}
+  renderLine target (renderCheckbox { label := Text.plain "enabled" } enabled)
   renderLine target (renderButton (Text.plain "save") true)
   renderLine target (heading "plain rendering")
   renderLine target (Text.plain "Text.plainText removes styles while preserving visible output.")
-
-def main : IO Unit := do
-  let target ← TermColor.target
-  let stdinIsTty ← (← IO.getStdin).isTty
-  let forcedNonInteractive := (← IO.getEnv "TERMCOLOR_WIDGETS_NONINTERACTIVE").isSome
-  let runningInCi := (← IO.getEnv "CI").isSome
-  if stdinIsTty && !forcedNonInteractive && !runningInCi then
-    interactiveDemo target
-  else
-    renderDemo target

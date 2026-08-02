@@ -68,11 +68,10 @@ lake build TermColor.Widgets TermColor.Widgets.Properties demo
 lake exe demo
 ```
 
-When run from a TTY, the demo enters a direct-key control loop. Use `Tab` to move focus,
-arrow keys to edit controls, `Enter` to activate the button, and `Esc` to quit. The tiny raw-input
-shim is demo-only; the reusable terminal input layer belongs in `termcolor-terminal`.
-Pipes, CI, and tests automatically use the one-shot renderer; force that mode with
-`TERMCOLOR_WIDGETS_NONINTERACTIVE=1 lake exe demo`.
+The demo is deliberately non-interactive: it renders pure widget views once and exits, including a
+static preview of the input, slider, checkbox, and button. Keyboard input and terminal redraw belong
+to [`termcolor-terminal`](https://github.com/jonaprieto/lean-termcolor-terminal), whose demo provides
+the direct-key TUI.
 
 `TermColor.Widgets.Properties` contains machine-checked rendering examples. `examples/Demo.lean`
 exercises default and custom progress bars, styled labels and bars, hidden percentages, zero and
