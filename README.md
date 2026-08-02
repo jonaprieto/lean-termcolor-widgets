@@ -11,6 +11,9 @@ There is no IO, cursor control, timer, or FFI dependency.
 The package depends on [`termcolor-layout`](https://github.com/jonaprieto/lean-termcolor-layout) for
 styled text and display-width-aware layout.
 
+[`termcolor-terminal`](https://github.com/jonaprieto/lean-termcolor-terminal) supplies the live
+terminal integration for these pure views.
+
 ## Widgets
 
 `progressBar` covers known totals, while `indeterminateProgressBar` gives unknown-duration work a
