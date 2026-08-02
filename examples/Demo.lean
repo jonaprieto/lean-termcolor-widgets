@@ -31,26 +31,12 @@ private structure DemoState where
 
 private def renderForm (target : RenderTarget) (state : DemoState) : IO Unit := do
   renderLine target (heading "interactive controls")
-  renderLine target (renderTextInput nameConfig state.name (state.focus == 0))
-  renderLine target (renderSlider sliderConfig state.volume)
-  renderLine target (renderCheckbox { label := Text.plain "enabled" } state.enabled)
-  renderLine target (renderButton (Text.plain "save") (state.focus == 3))
-
-private def commandKey (input : String) : Option Key :=
-  match input.trimAscii.toString with
-  | "tab" => some .tab
-  | "left" => some .left
-  | "right" => some .right
-  | "up" => some .up
-  | "down" => some .down
-  | "backspace" => some .backspace
-  | "delete" => some .delete
-  | "space" => some (.char ' ')
-  | "enter" => some .enter
-  | command =>
-      match command.toList with
-      | [character] => some (.char character)
-      | _ => none
+  let marker := fun (index : Nat) => Text.plain (if state.focus == index then "> " else "  ")
+  renderLine target (marker 0 ++ renderTextInput nameConfig state.name (state.focus == 0))
+  renderLine target (marker 1 ++ renderSlider sliderConfig state.volume)
+  renderLine target (marker 2 ++ renderCheckbox { label := Text.plain "enabled" } state.enabled)
+  renderLine target (marker 3 ++ renderButton (Text.plain "save") (state.focus == 3))
+  renderLine target (Text.styled "Tab focus  •  arrows edit  •  Enter save  •  Esc quit" Style.dim)
 
 private def applyKey (state : DemoState) (key : Key) : DemoState × Bool :=
   match key with
@@ -62,29 +48,64 @@ private def applyKey (state : DemoState) (key : Key) : DemoState × Bool :=
       | 2 => ({ state with enabled := updateCheckbox key state.enabled }, false)
       | _ => (state, buttonActivated key)
 
-private def interactiveDemo (target : RenderTarget) : IO Unit := do
-  IO.println "Interactive mode. Commands: tab, left, right, up, down, backspace, space, enter."
-  IO.println "Use `text VALUE` to replace the name, `q` to quit."
-  let mut state : DemoState := {}
-  let mut finished := false
-  while !finished do
-    renderForm target state
-    IO.print "command> "
-    let input ← (← IO.getStdin).getLine
-    let command := input.trimAscii.toString
-    if command == "q" then
-      finished := true
-    else if command.startsWith "text " then
-      let value := (command.drop 5).toString
-      state := { state with name := { value, cursor := value.toList.length } }
-    else
-      match commandKey input with
+private def stty (command : String) : IO IO.Process.Output :=
+  IO.Process.output { cmd := "sh", args := #["-c", command] }
+
+private def withRawInput (action : IO Unit) : IO Unit := do
+  let saved ← stty "stty -g < /dev/tty"
+  if saved.exitCode != 0 then
+    throw (IO.userError "could not read terminal settings")
+  let configured ← stty "stty -echo -icanon min 1 time 1 < /dev/tty"
+  if configured.exitCode != 0 then
+    throw (IO.userError "could not configure raw terminal input")
+  try
+    action
+  finally
+    let restore := "stty " ++ saved.stdout.trimAscii.toString ++ " < /dev/tty"
+    let _ ← stty restore
+
+private def readByte : IO (Option UInt8) := do
+  let bytes ← (← IO.getStdin).read 1
+  pure bytes[0]?
+
+private def readKey : IO (Option Key) := do
+  match ← readByte with
+  | none => pure none
+  | some 27 =>
+      match ← readByte with
+      | some 91 =>
+          match ← readByte with
+          | some 65 => pure (some .up)
+          | some 66 => pure (some .down)
+          | some 67 => pure (some .right)
+          | some 68 => pure (some .left)
+          | _ => pure (some .escape)
+      | _ => pure (some .escape)
+  | some 13 | some 10 => pure (some .enter)
+  | some 8 | some 127 => pure (some .backspace)
+  | some 9 => pure (some .tab)
+  | some byte =>
+      if byte.toNat < 128 then
+        pure (some (.char (Char.ofNat byte.toNat)))
+      else
+        pure none
+
+private def interactiveDemo (target : RenderTarget) : IO Unit := withRawInput do
+  IO.print "\u001b[?25l"
+  try
+    let mut state : DemoState := {}
+    let mut finished := false
+    while !finished do
+      IO.print "\u001b[2J\u001b[H"
+      renderForm target state
+      match ← readKey with
+      | none | some .escape => finished := true
       | some key =>
           let (next, activated) := applyKey state key
           state := next
           finished := activated
-      | none => IO.println "Unknown command. Use `tab`, `text VALUE`, or `q`."
-  IO.println "Done."
+  finally
+    IO.print "\u001b[?25h\u001b[2J\u001b[H"
 
 private def renderDemo (target : RenderTarget) : IO Unit := do
   renderLine target (Text.styled "termcolor-widgets" (Style.bold <+> Style.fg (.indexed 45)))
