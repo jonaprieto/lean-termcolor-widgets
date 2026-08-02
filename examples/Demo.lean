@@ -57,5 +57,19 @@ def main : IO Unit := do
       Text.styled "time" Style.bold],
      [Text.plain "download", Text.styled "done" Style.green, Text.plain "2.1s"],
      [Text.plain "compile", Text.styled "running" Style.yellow, Text.plain "..."]])
+  renderLine target (heading "interactive controls")
+  let nameConfig : TextInputConfig :=
+    { width := 16, maxLength := 16, label := Text.plain "name: " }
+  let name := updateTextInput nameConfig (.char 'L') {}
+  let name := updateTextInput nameConfig (.char 'e') name
+  let name := updateTextInput nameConfig (.char 'a') name
+  renderLine target (renderTextInput nameConfig name true)
+  let sliderConfig : SliderConfig :=
+    { width := 12, label := Text.plain "volume: " }
+  let volume := updateSlider sliderConfig .right { value := 6 }
+  renderLine target (renderSlider sliderConfig volume)
+  let enabled := updateCheckbox (.char ' ') {}
+  renderLine target (renderCheckbox { label := Text.plain "enabled" } enabled)
+  renderLine target (renderButton (Text.plain "save") true)
   renderLine target (heading "plain rendering")
   renderLine target (Text.plain "Text.plainText removes styles while preserving visible output.")
