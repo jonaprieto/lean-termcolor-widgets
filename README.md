@@ -44,6 +44,13 @@ and forth across the bar; advance `IndeterminateProgressState.frame` from the ca
 Spinner frame indices wrap around the configured list, while an empty frame list renders safely as
 an empty frame.
 
+## Interactive controls
+
+The pure control core includes `renderTextInput`, `renderSlider`, `renderCheckbox`, and
+`renderButton`. Apply `updateTextInput`, `updateSlider`, and `updateCheckbox` to a `Key` to keep
+state transitions deterministic; terminal input and focus management belong to the caller.
+Text-input cursors are code-point offsets and controls render at fixed widths.
+
 ## Demo
 
 The demo renders known-total and indeterminate progress bars, spinners, status messages, tables,

@@ -97,5 +97,49 @@ theorem table_wraps_cells :
     (renderTable [4] [[Text.plain "hello"]]).plainText = "hell\no   " := by
   decide
 
+theorem text_input_inserts_and_deletes :
+    let config : TextInputConfig := { width := 6, maxLength := 6 }
+    let state := updateTextInput config (.char 'a') {}
+    let state := updateTextInput config (.char 'b') state
+    let state := updateTextInput config .left state
+    let state := updateTextInput config .backspace state
+    state.value = "b" ∧ state.cursor = 0 := by
+  decide
+
+theorem text_input_respects_max_length :
+    let config : TextInputConfig := { width := 2, maxLength := 2 }
+    let state := updateTextInput config (.char 'a') {}
+    let state := updateTextInput config (.char 'b') state
+    let state := updateTextInput config (.char 'c') state
+    state.value = "ab" ∧ state.cursor = 2 := by
+  decide
+
+theorem text_input_renders_fixed_width :
+    (renderTextInput { width := 4 } { value := "ab", cursor := 1 }).plainText =
+      "[ab  ]" := by
+  decide
+
+theorem slider_updates_and_clamps :
+    let config : SliderConfig := { min := 2, max := 6, step := 2 }
+    let state := updateSlider config .right { value := 5 }
+    let state := updateSlider config .left state
+    sliderValue config state = 4 := by
+  decide
+
+theorem slider_renders_value :
+    (renderSlider { width := 4, min := 0, max := 8 } { value := 4 }).plainText =
+      "[━━──] 4" := by
+  decide
+
+theorem checkbox_toggles :
+    (updateCheckbox (.char ' ') {}).checked = true ∧
+      (updateCheckbox .enter { checked := true }).checked = false := by
+  decide
+
+theorem button_activation :
+    buttonActivated .enter = true ∧ buttonActivated (.char ' ') = true ∧
+      buttonActivated .escape = false := by
+  decide
+
 end Widgets
 end TermColor
