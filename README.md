@@ -56,10 +56,12 @@ Text-input cursors are code-point offsets and controls render at fixed widths.
 
 ## Demo
 
-The demo renders known-total and indeterminate progress bars, spinners, status messages, tables,
-and plain-text fallback output.
+The visual gallery covers known-total and indeterminate progress bars, spinners, status messages,
+tables, pure controls, and plain-text fallback output.
 
-![termcolor-widgets demo output](assets/demo.png)
+![termcolor-widgets progress and status](assets/widgets-progress.svg)
+
+![termcolor-widgets controls and tables](assets/widgets-controls.svg)
 
 Build and run the full demo:
 

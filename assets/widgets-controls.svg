@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 520" role="img" aria-labelledby="title desc">
+  <title id="title">termcolor-widgets controls and tables</title>
+  <desc id="desc">Pure text input, slider, checkbox, button, and table widgets.</desc>
+  <rect width="1200" height="520" rx="20" fill="#181825"/>
+  <text x="48" y="62" fill="#cdd6f4" font-family="SFMono-Regular,Menlo,monospace" font-size="28" font-weight="700">Controls without terminal state</text>
+  <text x="48" y="94" fill="#a6adc8" font-family="SFMono-Regular,Menlo,monospace" font-size="17">deterministic Key → State → Text transitions</text>
+  <rect x="40" y="128" width="500" height="330" rx="16" fill="#1e1e2e" stroke="#cba6f7" stroke-width="2"/>
+  <text x="70" y="174" fill="#cba6f7" font-family="SFMono-Regular,Menlo,monospace" font-size="18" font-weight="700">FORM</text>
+  <text x="70" y="220" fill="#94e2d5" font-family="SFMono-Regular,Menlo,monospace" font-size="19">name: </text><rect x="170" y="198" width="280" height="34" rx="5" fill="#292b3b" stroke="#94e2d5"/><text x="188" y="222" fill="#cdd6f4" font-family="SFMono-Regular,Menlo,monospace" font-size="19">Lea│</text>
+  <text x="70" y="272" fill="#89b4fa" font-family="SFMono-Regular,Menlo,monospace" font-size="19">volume: </text><text x="188" y="272" fill="#cdd6f4" font-family="SFMono-Regular,Menlo,monospace" font-size="19">[━━━━━━──────] 6</text>
+  <text x="70" y="322" fill="#a6e3a1" font-family="SFMono-Regular,Menlo,monospace" font-size="19">[x] enabled</text>
+  <rect x="70" y="360" width="130" height="42" rx="6" fill="#cba6f7"/><text x="102" y="388" fill="#1e1e2e" font-family="SFMono-Regular,Menlo,monospace" font-size="19" font-weight="700">save</text>
+  <text x="590" y="174" fill="#cba6f7" font-family="SFMono-Regular,Menlo,monospace" font-size="18" font-weight="700">TABLE</text>
+  <text x="590" y="220" fill="#cba6f7" font-family="SFMono-Regular,Menlo,monospace" font-size="19" font-weight="700">task             status       time</text>
+  <text x="590" y="260" fill="#cdd6f4" font-family="SFMono-Regular,Menlo,monospace" font-size="19">download         <tspan fill="#a6e3a1">done</tspan>        2.1s</text>
+  <text x="590" y="300" fill="#cdd6f4" font-family="SFMono-Regular,Menlo,monospace" font-size="19">compile          <tspan fill="#f9e2af">running</tspan>    …</text>
+  <text x="590" y="358" fill="#6c7086" font-family="SFMono-Regular,Menlo,monospace" font-size="16">display-cell alignment</text>
+  <text x="590" y="390" fill="#94e2d5" font-family="SFMono-Regular,Menlo,monospace" font-size="16">wide and combining labels stay aligned</text>
+  <text x="590" y="438" fill="#6c7086" font-family="SFMono-Regular,Menlo,monospace" font-size="16">plain rendering removes styles, not structure</text>
+</svg>
