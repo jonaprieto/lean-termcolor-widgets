@@ -26,12 +26,12 @@ jobs:
           test -n "$TERMCOLOR_READ_TOKEN"
           git config --global url."https://x-access-token:${TERMCOLOR_READ_TOKEN}@github.com/".insteadOf "https://github.com/"
       - name: Cache elan toolchain
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/.elan
           key: elan-${{ runner.os }}-${{ hashFiles('lean-toolchain') }}
       - name: Cache build
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: |
             .lake
