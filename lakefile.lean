@@ -7,11 +7,11 @@ package «termcolor-widgets» where
 
 require «termcolor-layout» from git
   "https://github.com/jonaprieto/lean-termcolor-layout.git"
-  @ "d45b699afecb7cca8328778b1f7cc6a793b43dcd"
+  @ "56dfeb9bfc906c20ba79d2c9b0ab95152d532f0a"
 
 require «termcolor» from git
   "https://github.com/jonaprieto/lean-termcolor.git"
-  @ "ac9a102562fa65435365758cf5fe5ac95c6a7a92"
+  @ "0d5a6ba9ac64912a91fd724eb986a18fc0793b98"
 
 @[default_target]
 lean_lib «TermColor.Widgets» where
