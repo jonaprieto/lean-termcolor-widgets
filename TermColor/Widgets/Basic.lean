@@ -322,7 +322,8 @@ def updateTextInput (config : TextInputConfig) (key : Key) (state : TextInputSta
         { state with cursor }
   | _ => { state with cursor }
 
-private def inputContent (config : TextInputConfig) (state : TextInputState)
+/-- Render the fixed-width input body without a frame, for embedding in a caller-owned layout. -/
+def textInputBody (config : TextInputConfig) (state : TextInputState)
     (focused : Bool) : Text :=
   if config.width == 0 then Text.empty else
     let allCharacters := state.value.toList
@@ -349,7 +350,7 @@ private def inputContent (config : TextInputConfig) (state : TextInputState)
 /-- Render a single-line input with an optional visible cursor. -/
 def renderTextInput (config : TextInputConfig) (state : TextInputState)
     (focused : Bool := false) : Text :=
-  withLabel config.label ++ Text.plain "[" ++ inputContent config state focused ++ Text.plain "]"
+  withLabel config.label ++ Text.plain "[" ++ textInputBody config state focused ++ Text.plain "]"
 
 /-- State for an integer slider. Values are clamped to the configured range. -/
 structure SliderState where

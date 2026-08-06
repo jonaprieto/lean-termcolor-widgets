@@ -128,6 +128,10 @@ theorem text_input_keeps_cursor_visible :
       "[cdef]" := by
   decide
 
+theorem text_input_body_is_unframed :
+    (textInputBody { width := 4 } { value := "ab", cursor := 1 }).plainText = "ab  " := by
+  decide
+
 theorem text_input_supports_line_motion :
     let config : TextInputConfig := { maxLength := 10 }
     let state := updateTextInput config (.char 'a') {}
