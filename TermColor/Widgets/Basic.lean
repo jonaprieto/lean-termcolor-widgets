@@ -236,14 +236,20 @@ def renderTable (widths : List Nat) (rows : List (List Text))
 /-- Keyboard input understood by pure interactive widgets. -/
 inductive Key where
   | char (value : Char)
+  | ctrl (value : Char)
   | left
   | right
+  | home
+  | end
   | up
   | down
+  | pageUp
+  | pageDown
   | enter
   | backspace
   | delete
   | tab
+  | shiftTab
   | escape
   deriving BEq, DecidableEq, Repr
 
@@ -290,6 +296,20 @@ def updateTextInput (config : TextInputConfig) (key : Key) (state : TextInputSta
         { state with cursor }
   | .left => { state with cursor := cursor.pred }
   | .right => { state with cursor := min length (cursor + 1) }
+  | .home | .ctrl 'a' => { state with cursor := 0 }
+  | .end | .ctrl 'e' => { state with cursor := length }
+  | .ctrl 'u' =>
+      { value := String.ofList (state.value.toList.drop cursor), cursor := 0 }
+  | .ctrl 'k' =>
+      { value := String.ofList (state.value.toList.take cursor), cursor }
+  | .ctrl 'w' =>
+      let before := state.value.toList.take cursor
+      let trimmed := List.dropWhile (fun character => character == ' ') before.reverse
+      let keptWithSpace := List.reverse
+        (List.dropWhile (fun character => character != ' ') trimmed)
+      let kept := List.reverse
+        (List.dropWhile (fun character => character == ' ') keptWithSpace.reverse)
+      { value := String.ofList (kept ++ state.value.toList.drop cursor), cursor := kept.length }
   | .backspace =>
       if cursor == 0 then
         { state with cursor }
@@ -304,23 +324,27 @@ def updateTextInput (config : TextInputConfig) (key : Key) (state : TextInputSta
 
 private def inputContent (config : TextInputConfig) (state : TextInputState)
     (focused : Bool) : Text :=
-  let characters := state.value.toList.take config.width
-  let cursor := min (clampCursor state) characters.length
-  let before := String.ofList (characters.take cursor)
-  let cursorCharacter := (characters.drop cursor).head?.getD ' '
-  -- ponytail: code-point cursor; add grapheme/display-cell editing when Unicode input needs it.
-  let dropIndex := if focused && cursor < characters.length then Nat.succ cursor else cursor
-  let after := String.ofList (characters.drop dropIndex)
-  let cursorText := if focused then
-      let style := Style.combine config.textStyle
-        config.cursorStyle
-      Text.styled (String.singleton cursorCharacter) style
-    else Text.empty
-  Text.styled before config.textStyle ++
-    (if focused then cursorText else Text.empty) ++
-    Text.styled after config.textStyle ++
-    Text.styled (String.ofList (List.replicate (config.width - characters.length) ' '))
-      config.textStyle
+  if config.width == 0 then Text.empty else
+    let allCharacters := state.value.toList
+    let cursor := clampCursor state
+    let offset := cursor + 1 - config.width
+    let characters := allCharacters.drop offset |>.take config.width
+    let cursor := cursor - offset
+    let before := String.ofList (characters.take cursor)
+    let cursorCharacter := (characters.drop cursor).head?.getD ' '
+    let dropIndex := if focused && cursor < characters.length then Nat.succ cursor else cursor
+    let after := String.ofList (characters.drop dropIndex)
+    let cursorText := if focused then
+        let style := Style.combine config.textStyle
+          config.cursorStyle
+        Text.styled (String.singleton cursorCharacter) style
+      else Text.empty
+    let renderedLength := before.length + (if focused then 1 else 0) + after.length
+    Text.styled before config.textStyle ++
+      (if focused then cursorText else Text.empty) ++
+      Text.styled after config.textStyle ++
+      Text.styled (String.ofList (List.replicate (config.width - renderedLength) ' '))
+        config.textStyle
 
 /-- Render a single-line input with an optional visible cursor. -/
 def renderTextInput (config : TextInputConfig) (state : TextInputState)

@@ -52,7 +52,8 @@ an empty frame.
 The pure control core includes `renderTextInput`, `renderSlider`, `renderCheckbox`, and
 `renderButton`. Apply `updateTextInput`, `updateSlider`, and `updateCheckbox` to a `Key` to keep
 state transitions deterministic; terminal input and focus management belong to the caller.
-Text-input cursors are code-point offsets and controls render at fixed widths.
+Text-input cursors are code-point offsets, follow the visible window, and controls render at fixed
+widths. `Key` includes home/end, page movement, reverse-tab, and control-key constructors.
 
 ## Demo
 

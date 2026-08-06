@@ -123,6 +123,20 @@ theorem text_input_renders_fixed_width :
       "[ab  ]" := by
   decide
 
+theorem text_input_keeps_cursor_visible :
+    (renderTextInput { width := 4 } { value := "abcdef", cursor := 5 } true).plainText =
+      "[cdef]" := by
+  decide
+
+theorem text_input_supports_line_motion :
+    let config : TextInputConfig := { maxLength := 10 }
+    let state := updateTextInput config (.char 'a') {}
+    let state := updateTextInput config (.char 'b') state
+    let state := updateTextInput config .home state
+    let state := updateTextInput config (.ctrl 'e') state
+    state.cursor = 2 := by
+  decide
+
 theorem slider_updates_and_clamps :
     let config : SliderConfig := { min := 2, max := 6, step := 2 }
     let state := updateSlider config .right { value := 5 }
