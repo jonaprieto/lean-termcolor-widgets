@@ -129,7 +129,7 @@ theorem text_input_keeps_cursor_visible :
   decide
 
 theorem text_input_body_is_unframed :
-    (textInputBody { width := 4 } { value := "ab", cursor := 1 }).plainText = "ab  " := by
+    (textInputBody { width := 4 } { value := "ab", cursor := 1 } false).plainText = "ab  " := by
   decide
 
 theorem text_input_supports_line_motion :
