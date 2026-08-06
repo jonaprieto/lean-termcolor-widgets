@@ -82,6 +82,10 @@ theorem spinner_preserves_style :
       "\u001b[33m*\u001b[0m \u001b[2mloading\u001b[0m" := by
   decide
 
+theorem shimmer_preserves_text :
+    (shimmer {} { frame := 10 } (Text.styled "Think" Style.bold)).plainText = "Think" := by
+  decide
+
 theorem status_renders_marker_and_message :
     (renderStatus .warning (Text.plain "slow connection")).plainText =
       "[warn] slow connection" := by

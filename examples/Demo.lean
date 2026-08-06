@@ -59,6 +59,11 @@ def main : IO Unit := do
       , label := Text.styled "custom frames" (Style.bold <+> Style.fg demoPalette.purple) })
   renderLine target (renderSpinner { frames := [Text.plain "|", Text.plain "/", Text.plain "-"] }
     { frame := 10, label := Text.plain "frame indices wrap" })
+  renderLine target (heading "shimmer")
+  for frame in [0, 3, 6, 9, 12] do
+    renderLine target (shimmer { band := 5 } { frame } (Text.plain "  Thinking..."))
+  renderLine target (shimmer { phaseStep := 0 } { frame := 5 }
+    (Text.styled "  breathing (no phase step)" (Style.bold <+> Style.fg demoPalette.purple)))
   renderLine target (heading "status messages")
   renderLine target (renderStatus .success
     (Text.styled "build complete" (Style.fg demoPalette.green)))

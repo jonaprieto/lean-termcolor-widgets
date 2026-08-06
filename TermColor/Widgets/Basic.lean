@@ -136,6 +136,80 @@ def renderSpinner (config : SpinnerConfig) (state : SpinnerState) : Text :=
   config.prefixText ++ spinnerFrame config state.frame ++ afterFrameLabel state.label ++
     config.suffixText
 
+/-- Rendering choices for a moving brightness highlight. A zero phase step makes it breathe. -/
+structure ShimmerConfig where
+  base : Color := .rgb 100 100 100
+  highlight : Color := .rgb 255 255 255
+  band : Nat := 6
+  phaseStep : Nat := 1
+  deriving BEq, DecidableEq, Repr
+
+instance : Inhabited ShimmerConfig := ⟨{}⟩
+
+/-- State displayed by a shimmer. `frame` selects the current highlight phase. -/
+structure ShimmerState where
+  frame : Nat := 0
+  deriving BEq, DecidableEq, Repr
+
+instance : Inhabited ShimmerState := ⟨{}⟩
+
+private def colorRgb : Color → Nat × Nat × Nat
+  | .default => (0, 0, 0)
+  | .ansi intensity basic =>
+      let rgb := Color.ansi256Rgb (Color.ansiIndex intensity basic)
+      (rgb.1, rgb.2.1, rgb.2.2)
+  | .indexed index =>
+      let rgb := Color.ansi256Rgb index
+      (rgb.1, rgb.2.1, rgb.2.2)
+  | .rgb red green blue => (red.toNat, green.toNat, blue.toNat)
+
+private def interpolateChannel (base highlight amount : Nat) : UInt8 :=
+  UInt8.ofNat ((base * (255 - amount) + highlight * amount) / 255)
+
+private def interpolateColor (base highlight : Color) (amount : Nat) : Color :=
+  let amount := min 255 amount
+  if base == highlight then base
+  else if amount == 0 then base
+  else if amount == 255 then highlight
+  else
+    let (baseRed, baseGreen, baseBlue) := colorRgb base
+    let (highlightRed, highlightGreen, highlightBlue) := colorRgb highlight
+    .rgb (interpolateChannel baseRed highlightRed amount)
+      (interpolateChannel baseGreen highlightGreen amount)
+      (interpolateChannel baseBlue highlightBlue amount)
+
+private def naturalDistance (left right : Nat) : Nat :=
+  if left < right then right - left else left - right
+
+private def shimmerLevel (band phase position : Nat) : Nat :=
+  if band == 0 then 0
+  else
+    let distance := naturalDistance (position + band) phase
+    if distance >= band then 0 else (band - distance) * 255 / band
+
+private def shimmerCharacters (config : ShimmerConfig) (phase : Nat) (position : Nat) :
+    List (Char × Style × Option String) → List (Char × Style × Option String)
+  | [] => []
+  | (character, style, link) :: rest =>
+      if character == '\n' then
+        (character, style, link) :: shimmerCharacters config phase 0 rest
+      else
+        let amount := shimmerLevel config.band phase (position * config.phaseStep)
+        let color := interpolateColor config.base config.highlight amount
+        let style := Style.combine style (Style.fg color)
+        (character, style, link) ::
+          shimmerCharacters config phase (position + Layout.charWidth character) rest
+
+/-- Render a display-width-aware shimmer while preserving non-color text styles. -/
+def shimmer (config : ShimmerConfig) (state : ShimmerState) (text : Text) : Text :=
+  let span := text.width * config.phaseStep + 2 * config.band
+  let phase := state.frame % max 1 span
+  let characters := text.segments.flatMap fun segment =>
+    segment.text.toList.map fun character => (character, segment.style, segment.link)
+  let characters := shimmerCharacters config phase 0 characters
+  { segments := characters.map fun (character, style, link) =>
+      { text := character.toString, style, link } }
+
 /-- Common status markers for command-line messages. -/
 inductive StatusKind where
   | success
