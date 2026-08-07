@@ -253,6 +253,174 @@ inductive Key where
   | escape
   deriving BEq, DecidableEq, Repr
 
+/-- Keyboard bindings for a collapsible widget. Focus traversal remains an application concern. -/
+structure CollapsibleKeyConfig where
+  toggleKeys : List Key := [.enter, .char ' ']
+  expandKeys : List Key := [.right]
+  collapseKeys : List Key := [.left, .escape]
+  scrollUpKeys : List Key := [.up]
+  scrollDownKeys : List Key := [.down]
+  pageUpKeys : List Key := [.pageUp]
+  pageDownKeys : List Key := [.pageDown]
+  deriving BEq, DecidableEq, Repr
+
+instance : Inhabited CollapsibleKeyConfig := ⟨{}⟩
+
+/-- Display state owned by one collapsible widget. The scroll offset counts wrapped body lines. -/
+structure CollapsibleState where
+  expanded : Bool := false
+  focused : Bool := false
+  scrollOffset : Nat := 0
+  deriving BEq, DecidableEq, Repr
+
+instance : Inhabited CollapsibleState := ⟨{}⟩
+
+/-- Rendering and keyboard choices for a collapsible widget. -/
+structure CollapsibleConfig where
+  collapsedMarker : Text := Text.plain "▸ "
+  expandedMarker : Text := Text.plain "▾ "
+  summaryStyle : Style := {}
+  bodyStyle : Style := {}
+  focusStyle : Style := Style.reverse
+  bodyPrefix : Text := Text.plain "  "
+  maxBodyLines : Nat := 8
+  overflowText : Text := Text.plain "… more"
+  emptyText : Text := Text.plain "(no logs)"
+  keys : CollapsibleKeyConfig := {}
+  deriving BEq, DecidableEq, Repr
+
+instance : Inhabited CollapsibleConfig := ⟨{}⟩
+
+/-- The rendered frame and geometry of a collapsible widget. -/
+structure CollapsibleRender where
+  text : Text
+  lineCount : Nat
+  hitHeaderHeight : Nat
+  deriving BEq, DecidableEq, Repr
+
+instance : Inhabited CollapsibleRender :=
+  ⟨{ text := Text.empty, lineCount := 0, hitHeaderHeight := 0 }⟩
+
+private def keyIn (key : Key) (keys : List Key) : Bool := keys.any (· == key)
+
+private def overlayStyle (text : Text) (style : Style) : Text :=
+  { segments := text.segments.map fun segment =>
+      { segment with style := Style.combine segment.style style } }
+
+private def bodyLines (config : CollapsibleConfig) (width : Nat) (body : Text) : List Text :=
+  let body := if body.plainText.isEmpty then config.emptyText else body
+  Layout.splitLines (Layout.wrapLines (max 1 (width - config.bodyPrefix.width)) body)
+
+private def bodyLimit (config : CollapsibleConfig) : Nat := max 1 config.maxBodyLines
+
+private def maxScroll (config : CollapsibleConfig) (lineCount : Nat) : Nat :=
+  lineCount - min lineCount (bodyLimit config)
+
+/-- Toggle expansion and, when opening, move to the newest buffered body lines. -/
+def toggleCollapsible (config : CollapsibleConfig) (width : Nat) (body : Text)
+    (state : CollapsibleState) : CollapsibleState :=
+  if state.expanded then
+    { state with expanded := false }
+  else
+    { expanded := true, focused := state.focused,
+      scrollOffset := maxScroll config (bodyLines config width body).length }
+
+/-- Expand a collapsible and show its newest buffered body lines. -/
+def expandCollapsible (config : CollapsibleConfig) (width : Nat) (body : Text)
+    (state : CollapsibleState) : CollapsibleState :=
+  { expanded := true, focused := state.focused,
+    scrollOffset := maxScroll config (bodyLines config width body).length }
+
+/-- Collapse a collapsible without changing its focus or scroll position. -/
+def collapseCollapsible (state : CollapsibleState) : CollapsibleState :=
+  { state with expanded := false }
+
+/-- Scroll an expanded body toward its first line. -/
+def scrollCollapsibleUp (config : CollapsibleConfig) (width : Nat) (body : Text)
+    (state : CollapsibleState) : CollapsibleState :=
+  if state.expanded then
+    let limit := maxScroll config (bodyLines config width body).length
+    let offset := min state.scrollOffset limit
+    { state with scrollOffset := offset.pred }
+  else collapseCollapsible state
+
+/-- Scroll an expanded body toward its last line. -/
+def scrollCollapsibleDown (config : CollapsibleConfig) (width : Nat) (body : Text)
+    (state : CollapsibleState) : CollapsibleState :=
+  if state.expanded then
+    let limit := maxScroll config (bodyLines config width body).length
+    { state with scrollOffset := min limit (state.scrollOffset + 1) }
+  else state
+
+/-- Scroll an expanded body one viewport toward its first line. -/
+def pageUpCollapsible (config : CollapsibleConfig) (width : Nat) (body : Text)
+    (state : CollapsibleState) : CollapsibleState :=
+  if state.expanded then
+    let limit := maxScroll config (bodyLines config width body).length
+    let offset := min state.scrollOffset limit
+    { state with scrollOffset := offset - bodyLimit config }
+  else state
+
+/-- Scroll an expanded body one viewport toward its last line. -/
+def pageDownCollapsible (config : CollapsibleConfig) (width : Nat) (body : Text)
+    (state : CollapsibleState) : CollapsibleState :=
+  if state.expanded then
+    let limit := maxScroll config (bodyLines config width body).length
+    { state with scrollOffset := min limit (state.scrollOffset + bodyLimit config) }
+  else state
+
+/-- Apply one configured key to a collapsible's pure display state. -/
+def handleCollapsibleKey (config : CollapsibleConfig) (width : Nat) (body : Text)
+    (key : Key) (state : CollapsibleState) : CollapsibleState :=
+  if keyIn key config.keys.toggleKeys then toggleCollapsible config width body state
+  else if keyIn key config.keys.expandKeys then expandCollapsible config width body state
+  else if keyIn key config.keys.collapseKeys then collapseCollapsible state
+  else if keyIn key config.keys.scrollUpKeys then
+    scrollCollapsibleUp config width body state
+  else if keyIn key config.keys.scrollDownKeys then
+    scrollCollapsibleDown config width body state
+  else if keyIn key config.keys.pageUpKeys then
+    pageUpCollapsible config width body state
+  else if keyIn key config.keys.pageDownKeys then
+    pageDownCollapsible config width body state
+  else state
+
+/-- Render the wrapped, focusable header of a collapsible widget. -/
+def renderCollapsibleHeader (config : CollapsibleConfig) (width : Nat) (summary : Text)
+    (state : CollapsibleState) : Text :=
+  let marker := if state.expanded then config.expandedMarker else config.collapsedMarker
+  let summary := overlayStyle summary config.summaryStyle
+  let header := marker ++ summary
+  let header := if state.focused then overlayStyle header config.focusStyle else header
+  Layout.wrapLines (max 1 width) header
+
+/-- Render the currently visible, wrapped body lines of an expanded widget. -/
+def renderCollapsibleBody (config : CollapsibleConfig) (width : Nat) (body : Text)
+    (state : CollapsibleState) : Text :=
+  if !state.expanded then Text.empty else
+    let lines := bodyLines config width body
+    let limit := bodyLimit config
+    let start := min state.scrollOffset (maxScroll config lines.length)
+    let hasPrevious := start > 0
+    let hasNext := start + limit < lines.length
+    let markers := (if hasPrevious then 1 else 0) + (if hasNext then 1 else 0)
+    let contentLimit := limit - min limit markers
+    let content := if hasPrevious && !hasNext then
+        lines.drop (lines.length - contentLimit)
+      else lines.drop start |>.take contentLimit
+    let content := (if hasPrevious then [config.overflowText] else []) ++ content ++
+      (if hasNext then [config.overflowText] else [])
+    Layout.joinLines (content.map fun line =>
+      config.bodyPrefix ++ overlayStyle line config.bodyStyle)
+
+/-- Render a collapsible with its visible line count and header hit height. -/
+def renderCollapsible (config : CollapsibleConfig) (width : Nat) (summary body : Text)
+    (state : CollapsibleState) : CollapsibleRender :=
+  let header := renderCollapsibleHeader config width summary state
+  let body := renderCollapsibleBody config width body state
+  let text := if state.expanded then header ++ Text.plain "\n" ++ body else header
+  { text, lineCount := text.height, hitHeaderHeight := header.height }
+
 /-- State for a single-line text input. `cursor` is a code-point offset. -/
 structure TextInputState where
   value : String := ""

@@ -163,5 +163,59 @@ theorem button_activation :
       buttonActivated .escape = false := by
   decide
 
+theorem collapsible_default_is_collapsed :
+    let frame := renderCollapsible {} 30 (Text.plain "build") (Text.plain "done") {}
+    frame.text.plainText = "▸ build" ∧ frame.lineCount = 1 ∧ frame.hitHeaderHeight = 1 := by
+  native_decide
+
+theorem collapsible_expands_with_empty_body :
+    let config : CollapsibleConfig := { emptyText := Text.plain "no output" }
+    let frame := renderCollapsible config 30 (Text.plain "build") Text.empty
+      (expandCollapsible config 30 Text.empty {})
+    frame.text.plainText = "▾ build\n  no output" ∧ frame.lineCount = 2 := by
+  native_decide
+
+theorem collapsible_wraps_unicode_header :
+    let frame := renderCollapsible {} 5 (Text.plain "界界") Text.empty {}
+    frame.text.plainText = "▸ 界\n界" ∧ frame.hitHeaderHeight = 2 := by
+  native_decide
+
+theorem collapsible_respects_body_width_and_limit :
+    let config : CollapsibleConfig := { maxBodyLines := 2, overflowText := Text.plain "..." }
+    let body := Text.plain "abcd\nefgh\nijkl"
+    let state := expandCollapsible config 6 body {}
+    let frame := renderCollapsible config 6 (Text.plain "job") body state
+    frame.text.plainText = "▾ job\n  ...\n  ijkl" ∧ frame.lineCount = 3 := by
+  native_decide
+
+theorem collapsible_toggle_and_escape :
+    let config : CollapsibleConfig := {}
+    let body := Text.plain "a\nb"
+    let opened := handleCollapsibleKey config 30 body .enter {}
+    let closed := handleCollapsibleKey config 30 body .escape opened
+    opened.expanded = true ∧ closed.expanded = false := by
+  native_decide
+
+theorem collapsible_scroll_stays_in_bounds :
+    let config : CollapsibleConfig := { maxBodyLines := 2 }
+    let body := Text.plain "a\nb\nc\nd"
+    let opened := expandCollapsible config 30 body {}
+    let top := pageUpCollapsible config 30 body opened
+    let bottom := pageDownCollapsible config 30 body top
+    top.scrollOffset = 0 ∧ bottom.scrollOffset = 2 := by
+  native_decide
+
+theorem collapsible_style_and_prefix_are_configurable :
+    let config : CollapsibleConfig :=
+      { collapsedMarker := Text.plain "[-] "
+        , expandedMarker := Text.plain "[+] "
+        , bodyPrefix := Text.plain "> "
+        , emptyText := Text.plain "empty" }
+    (renderCollapsible config 30 (Text.plain "job") Text.empty {}).text.plainText = "[-] job" ∧
+      (renderCollapsible config 30 (Text.plain "job") Text.empty
+        (expandCollapsible config 30 Text.empty {})).text.plainText =
+        "[+] job\n> empty" := by
+  native_decide
+
 end Widgets
 end TermColor

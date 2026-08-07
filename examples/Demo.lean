@@ -70,6 +70,24 @@ def main : IO Unit := do
   renderLine target (renderStatus .warning
     (Text.styled "using a fallback" (Style.fg demoPalette.yellow)))
   renderLine target (renderStatus .error (Text.styled "build failed" (Style.fg demoPalette.red)))
+  renderLine target (heading "collapsible jobs")
+  let collapsibleConfig : CollapsibleConfig :=
+    { collapsedMarker := Text.styled "▸ " (Style.fg demoPalette.cyan)
+      , expandedMarker := Text.styled "▾ " (Style.fg demoPalette.cyan)
+      , bodyStyle := Style.dim <+> Style.fg demoPalette.comment
+      , bodyPrefix := Text.plain "  "
+      , maxBodyLines := 3
+      , overflowText := Text.styled "… more" (Style.fg demoPalette.yellow)
+      , emptyText := Text.styled "(no logs)" (Style.dim <+> Style.fg demoPalette.comment) }
+  let collapsed := renderCollapsible collapsibleConfig 42
+    (Text.styled "compile · 3 logs" (Style.bold <+> Style.fg demoPalette.foreground))
+    (Text.plain "fetch\nparse\ncompile") {}
+  renderLine target collapsed.text
+  let body := Text.plain "fetch\nparse\ncompile\nlink\npackage"
+  let expandedState := expandCollapsible collapsibleConfig 42 body { focused := true }
+  renderLine target (renderCollapsible collapsibleConfig 42
+    (Text.styled "compile · 5 logs" (Style.bold <+> Style.fg demoPalette.foreground)) body
+    expandedState).text
   renderLine target (heading "tables")
   renderLine target (renderTable [14, 10, 8]
     [[Text.styled "task" (Style.bold <+> Style.fg demoPalette.purple)
