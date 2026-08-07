@@ -2,7 +2,7 @@ import Lake
 open Lake DSL
 
 package «termcolor-widgets» where
-  version := v!"0.1.8"
+  version := v!"0.1.9"
   leanOptions := #[⟨`autoImplicit, false⟩, ⟨`relaxedAutoImplicit, false⟩]
 
 require «termcolor-layout» from git
