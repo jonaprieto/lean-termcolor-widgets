@@ -1,7 +1,9 @@
 # termcolor-widgets
 
 [![CI](https://github.com/jonaprieto/lean-termcolor-widgets/actions/workflows/ci.yml/badge.svg)](https://github.com/jonaprieto/lean-termcolor-widgets/actions/workflows/ci.yml)
-[![Lean 4](https://img.shields.io/badge/Lean%204-library-5f5f5f)](lean-toolchain)
+[![Release](https://img.shields.io/github/v/release/jonaprieto/lean-termcolor-widgets?display_name=tag&sort=semver)](https://github.com/jonaprieto/lean-termcolor-widgets/releases)
+[![Lean 4](https://img.shields.io/badge/Lean%204-v4.33.0-6f42c1)](lean-toolchain)
+[![Docs](https://img.shields.io/badge/docs-GitHub%20Pages-4c8bf5)](https://jonaprieto.github.io/lean-termcolor-widgets/)
 [![License](https://img.shields.io/badge/license-Apache--2.0-green)](LICENSE)
 
 Pure terminal widgets for Lean 4. Rendering returns styled `TermColor.Text`; timing, terminal
