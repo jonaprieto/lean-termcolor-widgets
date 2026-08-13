@@ -9,6 +9,8 @@
 Pure terminal widgets for Lean 4. Rendering returns styled `TermColor.Text`; timing, terminal
 size, focus, and output remain with the caller.
 
+<p align="center"><img src="docs/assets/termcolor-widgets.png" alt="TermColor widgets demo" width="480"></p>
+
 ## Widgets
 
 Progress bars, indeterminate progress, spinners, status messages, tables, text input, sliders,
