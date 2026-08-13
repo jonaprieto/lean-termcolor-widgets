@@ -38,7 +38,10 @@ lake exe demo
 ## Related projects
 
 [`termcolor-terminal`](https://github.com/jonaprieto/lean-termcolor-terminal) connects widgets
-to live terminal output. Keep application state and event handling outside this package.
+to live terminal output. [`termcolor`](https://github.com/jonaprieto/lean-termcolor) supplies the
+text foundation; [`lean-calc-chat`](https://github.com/jonaprieto/lean-calc-chat) and
+[`oatp`](https://github.com/jonaprieto/oatp) use the widgets in applications. Keep application
+state and event handling outside this package.
 
 ## License
 
