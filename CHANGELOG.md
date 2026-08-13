@@ -3,6 +3,7 @@
 ## 0.1.13 — 2026-08-13
 
 - Add the standard review guidance to the README.
+- Pin the newest released TermColor and TermColor Layout dependencies.
 
 ## 0.1.12 — 2026-08-13
 
