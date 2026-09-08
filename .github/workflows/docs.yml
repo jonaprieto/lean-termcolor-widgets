@@ -55,7 +55,6 @@ jobs:
           # Lean's search path does not overlay sibling TermColor/ directories.
           mkdir -p .lake/packages/termcolor-layout/.lake/build/lib/lean/TermColor
           cp -R .lake/packages/termcolor/.lake/build/lib/lean/TermColor/. .lake/packages/termcolor-layout/.lake/build/lib/lean/TermColor/
-          cp .lake/packages/termcolor/.lake/build/lib/lean/TermColor.* .lake/packages/termcolor-layout/.lake/build/lib/lean/
           cp -R .lake/build/lib/lean/TermColor/. .lake/packages/termcolor-layout/.lake/build/lib/lean/TermColor/
           lake -d docbuild build TermColor.Widgets:docs
           touch docbuild/.lake/build/doc/.nojekyll
