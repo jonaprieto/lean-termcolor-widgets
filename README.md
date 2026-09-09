@@ -9,6 +9,11 @@
 Pure terminal widgets for Lean 4. Rendering returns styled `TermColor.Text`; timing, terminal
 size, focus, and output remain with the caller.
 
+## Problem
+
+Interactive terminal views should be reusable without coupling their rendering to clocks, input,
+or terminal output.
+
 <p align="center"><img src="docs/assets/termcolor-widgets.png" alt="TermColor widgets demo" width="480"></p>
 
 ## Development
