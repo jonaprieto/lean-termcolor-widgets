@@ -7,11 +7,11 @@ package «termcolor-widgets» where
 
 require «termcolor-layout» from git
   "https://github.com/jonaprieto/lean-termcolor-layout.git"
-  @ "v0.1.13"
+  @ "v0.1.14"
 
 require «termcolor» from git
   "https://github.com/jonaprieto/lean-termcolor.git"
-  @ "v1.1.5"
+  @ "v1.1.6"
 
 @[default_target]
 lean_lib «TermColor.Widgets» where
