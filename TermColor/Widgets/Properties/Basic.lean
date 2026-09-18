@@ -155,13 +155,15 @@ theorem slider_renders_value :
 
 theorem checkbox_toggles
     : (updateCheckbox (.char ' ') {}).checked = true ∧
-      (updateCheckbox .enter { checked := true }).checked = false := by
+      (updateCheckbox .enter { checked := true }).checked = false
+    := by
   decide
 
 theorem button_activation
     : buttonActivated .enter = true ∧
       buttonActivated (.char ' ') = true ∧
-      buttonActivated .escape = false := by
+      buttonActivated .escape = false
+    := by
   decide
 
 theorem collapsible_default_is_collapsed :
