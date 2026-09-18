@@ -14,10 +14,17 @@ open scoped TermColor.Style
 
 private def demoPalette : ColorScheme := ColorScheme.catppuccin
 
-private def heading (title : String) : Text :=
+private
+def heading
+    (title : String)
+    : Text :=
   Text.styled ("\n" ++ title ++ "\n") (Style.bold <+> Style.fg demoPalette.foreground)
 
-private def renderLine (target : RenderTarget) (text : Text) : IO Unit :=
+private
+def renderLine
+    (target : RenderTarget)
+    (text : Text)
+    : IO Unit :=
   IO.print (Text.render target (text ++ Text.plain "\n"))
 
 def main : IO Unit := do
