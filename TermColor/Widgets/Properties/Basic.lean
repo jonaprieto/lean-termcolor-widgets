@@ -11,16 +11,16 @@ set_option maxRecDepth 10000
 namespace TermColor
 namespace Widgets
 
-theorem zero_total_is_complete
-    : (progressBar { width := 8 } { total := 0 }).plainText = "[━━━━━━━━] 100%" := by
+theorem zero_total_is_complete :
+    (progressBar { width := 8 } { total := 0 }).plainText = "[━━━━━━━━] 100%" := by
   decide
 
-theorem progress_clamps_overflow
-    : (progressBar { width := 4 } { current := 9, total := 4 }).plainText = "[━━━━] 100%" := by
+theorem progress_clamps_overflow :
+    (progressBar { width := 4 } { current := 9, total := 4 }).plainText = "[━━━━] 100%" := by
   decide
 
-theorem progress_rounds_down
-    : (progressBar { width := 5 } { current := 1, total := 3 }).plainText = "[━────] 33%" := by
+theorem progress_rounds_down :
+    (progressBar { width := 5 } { current := 1, total := 3 }).plainText = "[━────] 33%" := by
   decide
 
 theorem progress_wide_glyph_keeps_width :
@@ -29,8 +29,8 @@ theorem progress_wide_glyph_keeps_width :
     text.plainText = "[界...] 50%" ∧ text.width = 11 := by
   decide
 
-theorem progress_can_hide_percentage
-    : (progressBar { width := 5, showPercentage := false } { current := 2, total := 4 }).plainText =
+theorem progress_can_hide_percentage :
+    (progressBar { width := 5, showPercentage := false } { current := 2, total := 4 }).plainText =
       "[━━───]" := by
   decide
 
@@ -59,13 +59,13 @@ theorem progress_preserves_bar_styles :
       "[\u001b[32m━\u001b[0m] \u001b[36m100%\u001b[0m" := by
   decide
 
-theorem spinner_frames_wrap
-    : (spinnerFrame { frames := [Text.plain "a", Text.plain "b", Text.plain "c"] } 4).plainText =
+theorem spinner_frames_wrap :
+    (spinnerFrame { frames := [Text.plain "a", Text.plain "b", Text.plain "c"] } 4).plainText =
       "b" := by
   decide
 
-theorem empty_spinner_is_safe
-    : (spinnerFrame { frames := [] } 10).plainText = "" := by
+theorem empty_spinner_is_safe :
+    (spinnerFrame { frames := [] } 10).plainText = "" := by
   decide
 
 theorem spinner_render_example :
@@ -82,8 +82,8 @@ theorem spinner_preserves_style :
       "\u001b[33m*\u001b[0m \u001b[2mloading\u001b[0m" := by
   decide
 
-theorem shimmer_preserves_text
-    : (shimmer {} { frame := 10 } (Text.styled "Think" Style.bold)).plainText = "Think" := by
+theorem shimmer_preserves_text :
+    (shimmer {} { frame := 10 } (Text.styled "Think" Style.bold)).plainText = "Think" := by
   decide
 
 theorem status_renders_marker_and_message :
@@ -97,8 +97,8 @@ theorem table_renders_fixed_width_rows :
       "name   state\nbuild  done " := by
   decide
 
-theorem table_wraps_cells
-    : (renderTable [4] [[Text.plain "hello"]]).plainText = "hell\no   " := by
+theorem table_wraps_cells :
+    (renderTable [4] [[Text.plain "hello"]]).plainText = "hell\no   " := by
   decide
 
 theorem text_input_inserts_and_deletes :
@@ -118,18 +118,18 @@ theorem text_input_respects_max_length :
     state.value = "ab" ∧ state.cursor = 2 := by
   decide
 
-theorem text_input_renders_fixed_width
-    : (renderTextInput { width := 4 } { value := "ab", cursor := 1 }).plainText =
+theorem text_input_renders_fixed_width :
+    (renderTextInput { width := 4 } { value := "ab", cursor := 1 }).plainText =
       "[ab  ]" := by
   decide
 
-theorem text_input_keeps_cursor_visible
-    : (renderTextInput { width := 4 } { value := "abcdef", cursor := 5 } true).plainText =
+theorem text_input_keeps_cursor_visible :
+    (renderTextInput { width := 4 } { value := "abcdef", cursor := 5 } true).plainText =
       "[cdef]" := by
   decide
 
-theorem text_input_body_is_unframed
-    : (textInputBody { width := 4 } { value := "ab", cursor := 1 } false).plainText = "ab  " := by
+theorem text_input_body_is_unframed :
+    (textInputBody { width := 4 } { value := "ab", cursor := 1 } false).plainText = "ab  " := by
   decide
 
 theorem text_input_supports_line_motion :
@@ -148,8 +148,8 @@ theorem slider_updates_and_clamps :
     sliderValue config state = 4 := by
   decide
 
-theorem slider_renders_value
-    : (renderSlider { width := 4, min := 0, max := 8 } { value := 4 }).plainText =
+theorem slider_renders_value :
+    (renderSlider { width := 4, min := 0, max := 8 } { value := 4 }).plainText =
       "[━━──] 4" := by
   decide
 
@@ -206,8 +206,8 @@ theorem collapsible_scroll_stays_in_bounds :
     top.scrollOffset = 0 ∧ bottom.scrollOffset = 2 := by
   native_decide
 
-theorem collapsible_style_and_prefix_are_configurable
-    : let config : CollapsibleConfig :=
+theorem collapsible_style_and_prefix_are_configurable :
+    let config : CollapsibleConfig :=
       { collapsedMarker := Text.plain "[-] "
         , expandedMarker := Text.plain "[+] "
         , bodyPrefix := Text.plain "> "

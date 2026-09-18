@@ -124,8 +124,7 @@ def indeterminateProgressBar
   withLabel state.label ++ bar
 
 /-- Default braille spinner frames. The caller advances the frame index. -/
-def defaultSpinnerFrames
-    : List Text :=
+def defaultSpinnerFrames : List Text :=
   [ Text.plain "⠋", Text.plain "⠙", Text.plain "⠹", Text.plain "⠸", Text.plain "⠼"
   , Text.plain "⠴", Text.plain "⠦", Text.plain "⠧", Text.plain "⠇", Text.plain "⠏" ]
 
