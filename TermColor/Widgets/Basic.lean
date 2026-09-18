@@ -15,7 +15,12 @@ Widgets own state-to-text rendering. A caller owns timers, terminal width, and o
 namespace TermColor
 namespace Widgets
 
-private def repeatToWidth (character : Char) (style : Style) (width : Nat) : Text :=
+private
+def repeatToWidth
+    (character : Char)
+    (style : Style)
+    (width : Nat)
+    : Text :=
   let characterWidth := Layout.charWidth character
   if characterWidth == 0 then
     Text.styled (String.ofList (List.replicate width ' ')) style
@@ -25,10 +30,16 @@ private def repeatToWidth (character : Char) (style : Style) (width : Nat) : Tex
     let glyphs := List.replicate count character ++ List.replicate (width - used) ' '
     Text.styled (String.ofList glyphs) style
 
-private def withLabel (label : Text) : Text :=
+private
+def withLabel
+    (label : Text)
+    : Text :=
   if label.segments.all (·.text.isEmpty) then Text.empty else label ++ Text.plain " "
 
-private def afterFrameLabel (label : Text) : Text :=
+private
+def afterFrameLabel
+    (label : Text)
+    : Text :=
   if label.segments.all (·.text.isEmpty) then Text.empty else Text.plain " " ++ label
 
 /-- State displayed by a progress bar. `current` is clamped to `total` when rendered. -/
@@ -56,11 +67,16 @@ structure ProgressConfig where
 instance : Inhabited ProgressConfig := ⟨{}⟩
 
 /-- Percentage shown by a progress bar. Zero total means no work remains, so it is complete. -/
-def progressPercent (state : ProgressState) : Nat :=
+def progressPercent
+    (state : ProgressState)
+    : Nat :=
   if state.total == 0 then 100 else min 100 (state.current * 100 / state.total)
 
 /-- Render a progress bar as styled text. The caller supplies the desired bar width explicitly. -/
-def progressBar (config : ProgressConfig) (state : ProgressState) : Text :=
+def progressBar
+    (config : ProgressConfig)
+    (state : ProgressState)
+    : Text :=
   let percent := progressPercent state
   let filled := config.width * percent / 100
   let empty := config.width - filled
@@ -81,8 +97,10 @@ structure IndeterminateProgressState where
 instance : Inhabited IndeterminateProgressState := ⟨{}⟩
 
 /-- Moving segment offset for an indeterminate progress bar. -/
-def indeterminateProgressOffset (config : ProgressConfig)
-    (state : IndeterminateProgressState) : Nat :=
+def indeterminateProgressOffset
+    (config : ProgressConfig)
+    (state : IndeterminateProgressState)
+    : Nat :=
   let segmentWidth := min config.width (max 1 config.indeterminateWidth)
   let span := config.width - segmentWidth
   if span == 0 then 0
@@ -92,8 +110,10 @@ def indeterminateProgressOffset (config : ProgressConfig)
 
 /-- Render a progress bar for work with no known total. The filled segment bounces at both ends.
 The caller advances `state.frame`. -/
-def indeterminateProgressBar (config : ProgressConfig)
-    (state : IndeterminateProgressState) : Text :=
+def indeterminateProgressBar
+    (config : ProgressConfig)
+    (state : IndeterminateProgressState)
+    : Text :=
   let segmentWidth := min config.width (max 1 config.indeterminateWidth)
   let offset := indeterminateProgressOffset config state
   let trailing := config.width - offset - segmentWidth
@@ -104,7 +124,8 @@ def indeterminateProgressBar (config : ProgressConfig)
   withLabel state.label ++ bar
 
 /-- Default braille spinner frames. The caller advances the frame index. -/
-def defaultSpinnerFrames : List Text :=
+def defaultSpinnerFrames
+    : List Text :=
   [ Text.plain "⠋", Text.plain "⠙", Text.plain "⠹", Text.plain "⠸", Text.plain "⠼"
   , Text.plain "⠴", Text.plain "⠦", Text.plain "⠧", Text.plain "⠇", Text.plain "⠏" ]
 
@@ -126,13 +147,19 @@ structure SpinnerConfig where
 instance : Inhabited SpinnerConfig := ⟨{}⟩
 
 /-- Select a spinner frame, wrapping around the configured frame list. -/
-def spinnerFrame (config : SpinnerConfig) (frame : Nat) : Text :=
+def spinnerFrame
+    (config : SpinnerConfig)
+    (frame : Nat)
+    : Text :=
   match config.frames with
   | [] => Text.empty
   | frames => frames.getD (frame % frames.length) Text.empty
 
 /-- Render one spinner frame and its optional label as styled text. -/
-def renderSpinner (config : SpinnerConfig) (state : SpinnerState) : Text :=
+def renderSpinner
+    (config : SpinnerConfig)
+    (state : SpinnerState)
+    : Text :=
   config.prefixText ++ spinnerFrame config state.frame ++ afterFrameLabel state.label ++
     config.suffixText
 
@@ -153,7 +180,10 @@ structure ShimmerState where
 
 instance : Inhabited ShimmerState := ⟨{}⟩
 
-private def colorRgb : Color → Nat × Nat × Nat
+private
+def colorRgb
+    : Color →
+      Nat × Nat × Nat
   | .default => (0, 0, 0)
   | .ansi intensity basic =>
       let rgb := Color.ansi256Rgb (Color.ansiIndex intensity basic)
@@ -163,10 +193,17 @@ private def colorRgb : Color → Nat × Nat × Nat
       (rgb.1, rgb.2.1, rgb.2.2)
   | .rgb red green blue => (red.toNat, green.toNat, blue.toNat)
 
-private def interpolateChannel (base highlight amount : Nat) : UInt8 :=
+private
+def interpolateChannel
+    (base highlight amount : Nat)
+    : UInt8 :=
   UInt8.ofNat ((base * (255 - amount) + highlight * amount) / 255)
 
-private def interpolateColor (base highlight : Color) (amount : Nat) : Color :=
+private
+def interpolateColor
+    (base highlight : Color)
+    (amount : Nat)
+    : Color :=
   let amount := min 255 amount
   if base == highlight then base
   else if amount == 0 then base
@@ -178,17 +215,28 @@ private def interpolateColor (base highlight : Color) (amount : Nat) : Color :=
       (interpolateChannel baseGreen highlightGreen amount)
       (interpolateChannel baseBlue highlightBlue amount)
 
-private def naturalDistance (left right : Nat) : Nat :=
+private
+def naturalDistance
+    (left right : Nat)
+    : Nat :=
   if left < right then right - left else left - right
 
-private def shimmerLevel (band phase position : Nat) : Nat :=
+private
+def shimmerLevel
+    (band phase position : Nat)
+    : Nat :=
   if band == 0 then 0
   else
     let distance := naturalDistance (position + band) phase
     if distance >= band then 0 else (band - distance) * 255 / band
 
-private def shimmerCharacters (config : ShimmerConfig) (phase : Nat) (position : Nat) :
-    List (Char × Style × Option String) → List (Char × Style × Option String)
+private
+def shimmerCharacters
+    (config : ShimmerConfig)
+    (phase : Nat)
+    (position : Nat)
+    : List (Char × Style × Option String) →
+      List (Char × Style × Option String)
   | [] => []
   | (character, style, link) :: rest =>
       if character == '\n' then
@@ -201,7 +249,11 @@ private def shimmerCharacters (config : ShimmerConfig) (phase : Nat) (position :
           shimmerCharacters config phase (position + Layout.charWidth character) rest
 
 /-- Render a display-width-aware shimmer while preserving non-color text styles. -/
-def shimmer (config : ShimmerConfig) (state : ShimmerState) (text : Text) : Text :=
+def shimmer
+    (config : ShimmerConfig)
+    (state : ShimmerState)
+    (text : Text)
+    : Text :=
   let span := text.width * config.phaseStep + 2 * config.band
   let phase := state.frame % max 1 span
   let characters := text.segments.flatMap fun segment =>
@@ -218,19 +270,29 @@ inductive StatusKind where
   | error
   deriving BEq, DecidableEq, Repr, Inhabited
 
-private def statusMarker : StatusKind → Text
+private
+def statusMarker
+    : StatusKind →
+      Text
   | .success => Text.styled "[ok]" Style.green
   | .info => Text.styled "[info]" Style.cyan
   | .warning => Text.styled "[warn]" Style.yellow
   | .error => Text.styled "[error]" Style.red
 
 /-- Render a styled status marker followed by a message. -/
-def renderStatus (kind : StatusKind) (message : Text) : Text :=
+def renderStatus
+    (kind : StatusKind)
+    (message : Text)
+    : Text :=
   statusMarker kind ++ Text.plain " " ++ message
 
 /-- Render rows as fixed-width, display-aware columns. Cells wrap to their column width. -/
-def renderTable (widths : List Nat) (rows : List (List Text))
-    (gap : Nat := 2) (alignments : List Layout.Alignment := []) : Text :=
+def renderTable
+    (widths : List Nat)
+    (rows : List (List Text))
+    (gap : Nat := 2)
+    (alignments : List Layout.Alignment := [])
+    : Text :=
   Layout.joinLines (rows.map fun row => Layout.columns widths gap row alignments)
 
 /-- Keyboard input understood by pure interactive widgets. -/
@@ -303,22 +365,39 @@ instance : Inhabited CollapsibleRender :=
 
 private def keyIn (key : Key) (keys : List Key) : Bool := keys.any (· == key)
 
-private def overlayStyle (text : Text) (style : Style) : Text :=
+private
+def overlayStyle
+    (text : Text)
+    (style : Style)
+    : Text :=
   { segments := text.segments.map fun segment =>
       { segment with style := Style.combine segment.style style } }
 
-private def bodyLines (config : CollapsibleConfig) (width : Nat) (body : Text) : List Text :=
+private
+def bodyLines
+    (config : CollapsibleConfig)
+    (width : Nat)
+    (body : Text)
+    : List Text :=
   let body := if body.plainText.isEmpty then config.emptyText else body
   Layout.splitLines (Layout.wrapLines (max 1 (width - config.bodyPrefix.width)) body)
 
 private def bodyLimit (config : CollapsibleConfig) : Nat := max 1 config.maxBodyLines
 
-private def maxScroll (config : CollapsibleConfig) (lineCount : Nat) : Nat :=
+private
+def maxScroll
+    (config : CollapsibleConfig)
+    (lineCount : Nat)
+    : Nat :=
   lineCount - min lineCount (bodyLimit config)
 
 /-- Toggle expansion and, when opening, move to the newest buffered body lines. -/
-def toggleCollapsible (config : CollapsibleConfig) (width : Nat) (body : Text)
-    (state : CollapsibleState) : CollapsibleState :=
+def toggleCollapsible
+    (config : CollapsibleConfig)
+    (width : Nat)
+    (body : Text)
+    (state : CollapsibleState)
+    : CollapsibleState :=
   if state.expanded then
     { state with expanded := false }
   else
@@ -326,18 +405,28 @@ def toggleCollapsible (config : CollapsibleConfig) (width : Nat) (body : Text)
       scrollOffset := maxScroll config (bodyLines config width body).length }
 
 /-- Expand a collapsible and show its newest buffered body lines. -/
-def expandCollapsible (config : CollapsibleConfig) (width : Nat) (body : Text)
-    (state : CollapsibleState) : CollapsibleState :=
+def expandCollapsible
+    (config : CollapsibleConfig)
+    (width : Nat)
+    (body : Text)
+    (state : CollapsibleState)
+    : CollapsibleState :=
   { expanded := true, focused := state.focused,
     scrollOffset := maxScroll config (bodyLines config width body).length }
 
 /-- Collapse a collapsible without changing its focus or scroll position. -/
-def collapseCollapsible (state : CollapsibleState) : CollapsibleState :=
+def collapseCollapsible
+    (state : CollapsibleState)
+    : CollapsibleState :=
   { state with expanded := false }
 
 /-- Scroll an expanded body toward its first line. -/
-def scrollCollapsibleUp (config : CollapsibleConfig) (width : Nat) (body : Text)
-    (state : CollapsibleState) : CollapsibleState :=
+def scrollCollapsibleUp
+    (config : CollapsibleConfig)
+    (width : Nat)
+    (body : Text)
+    (state : CollapsibleState)
+    : CollapsibleState :=
   if state.expanded then
     let limit := maxScroll config (bodyLines config width body).length
     let offset := min state.scrollOffset limit
@@ -345,16 +434,24 @@ def scrollCollapsibleUp (config : CollapsibleConfig) (width : Nat) (body : Text)
   else collapseCollapsible state
 
 /-- Scroll an expanded body toward its last line. -/
-def scrollCollapsibleDown (config : CollapsibleConfig) (width : Nat) (body : Text)
-    (state : CollapsibleState) : CollapsibleState :=
+def scrollCollapsibleDown
+    (config : CollapsibleConfig)
+    (width : Nat)
+    (body : Text)
+    (state : CollapsibleState)
+    : CollapsibleState :=
   if state.expanded then
     let limit := maxScroll config (bodyLines config width body).length
     { state with scrollOffset := min limit (state.scrollOffset + 1) }
   else state
 
 /-- Scroll an expanded body one viewport toward its first line. -/
-def pageUpCollapsible (config : CollapsibleConfig) (width : Nat) (body : Text)
-    (state : CollapsibleState) : CollapsibleState :=
+def pageUpCollapsible
+    (config : CollapsibleConfig)
+    (width : Nat)
+    (body : Text)
+    (state : CollapsibleState)
+    : CollapsibleState :=
   if state.expanded then
     let limit := maxScroll config (bodyLines config width body).length
     let offset := min state.scrollOffset limit
@@ -362,16 +459,25 @@ def pageUpCollapsible (config : CollapsibleConfig) (width : Nat) (body : Text)
   else state
 
 /-- Scroll an expanded body one viewport toward its last line. -/
-def pageDownCollapsible (config : CollapsibleConfig) (width : Nat) (body : Text)
-    (state : CollapsibleState) : CollapsibleState :=
+def pageDownCollapsible
+    (config : CollapsibleConfig)
+    (width : Nat)
+    (body : Text)
+    (state : CollapsibleState)
+    : CollapsibleState :=
   if state.expanded then
     let limit := maxScroll config (bodyLines config width body).length
     { state with scrollOffset := min limit (state.scrollOffset + bodyLimit config) }
   else state
 
 /-- Apply one configured key to a collapsible's pure display state. -/
-def handleCollapsibleKey (config : CollapsibleConfig) (width : Nat) (body : Text)
-    (key : Key) (state : CollapsibleState) : CollapsibleState :=
+def handleCollapsibleKey
+    (config : CollapsibleConfig)
+    (width : Nat)
+    (body : Text)
+    (key : Key)
+    (state : CollapsibleState)
+    : CollapsibleState :=
   if keyIn key config.keys.toggleKeys then toggleCollapsible config width body state
   else if keyIn key config.keys.expandKeys then expandCollapsible config width body state
   else if keyIn key config.keys.collapseKeys then collapseCollapsible state
@@ -386,8 +492,12 @@ def handleCollapsibleKey (config : CollapsibleConfig) (width : Nat) (body : Text
   else state
 
 /-- Render the wrapped, focusable header of a collapsible widget. -/
-def renderCollapsibleHeader (config : CollapsibleConfig) (width : Nat) (summary : Text)
-    (state : CollapsibleState) : Text :=
+def renderCollapsibleHeader
+    (config : CollapsibleConfig)
+    (width : Nat)
+    (summary : Text)
+    (state : CollapsibleState)
+    : Text :=
   let marker := if state.expanded then config.expandedMarker else config.collapsedMarker
   let summary := overlayStyle summary config.summaryStyle
   let header := marker ++ summary
@@ -395,8 +505,12 @@ def renderCollapsibleHeader (config : CollapsibleConfig) (width : Nat) (summary 
   Layout.wrapLines (max 1 width) header
 
 /-- Render the currently visible, wrapped body lines of an expanded widget. -/
-def renderCollapsibleBody (config : CollapsibleConfig) (width : Nat) (body : Text)
-    (state : CollapsibleState) : Text :=
+def renderCollapsibleBody
+    (config : CollapsibleConfig)
+    (width : Nat)
+    (body : Text)
+    (state : CollapsibleState)
+    : Text :=
   if !state.expanded then Text.empty else
     let lines := bodyLines config width body
     let limit := bodyLimit config
@@ -414,8 +528,12 @@ def renderCollapsibleBody (config : CollapsibleConfig) (width : Nat) (body : Tex
       config.bodyPrefix ++ overlayStyle line config.bodyStyle)
 
 /-- Render a collapsible with its visible line count and header hit height. -/
-def renderCollapsible (config : CollapsibleConfig) (width : Nat) (summary body : Text)
-    (state : CollapsibleState) : CollapsibleRender :=
+def renderCollapsible
+    (config : CollapsibleConfig)
+    (width : Nat)
+    (summary body : Text)
+    (state : CollapsibleState)
+    : CollapsibleRender :=
   let header := renderCollapsibleHeader config width summary state
   let body := renderCollapsibleBody config width body state
   let text := if state.expanded then header ++ Text.plain "\n" ++ body else header
@@ -440,20 +558,35 @@ structure TextInputConfig where
 
 instance : Inhabited TextInputConfig := ⟨{}⟩
 
-private def clampCursor (state : TextInputState) : Nat :=
+private
+def clampCursor
+    (state : TextInputState)
+    : Nat :=
   min state.cursor state.value.toList.length
 
-private def insertChar (value : String) (index : Nat) (character : Char) : String :=
+private
+def insertChar
+    (value : String)
+    (index : Nat)
+    (character : Char)
+    : String :=
   let characters := value.toList
   String.ofList (characters.take index ++ [character] ++ characters.drop index)
 
-private def deleteChar (value : String) (index : Nat) : String :=
+private
+def deleteChar
+    (value : String)
+    (index : Nat)
+    : String :=
   let characters := value.toList
   String.ofList (characters.take index ++ characters.drop (index + 1))
 
 /-- Apply one key to a text input. Input is limited by `maxLength`. -/
-def updateTextInput (config : TextInputConfig) (key : Key) (state : TextInputState) :
-    TextInputState :=
+def updateTextInput
+    (config : TextInputConfig)
+    (key : Key)
+    (state : TextInputState)
+    : TextInputState :=
   let cursor := clampCursor state
   let length := state.value.toList.length
   match key with
@@ -491,8 +624,11 @@ def updateTextInput (config : TextInputConfig) (key : Key) (state : TextInputSta
   | _ => { state with cursor }
 
 /-- Render the fixed-width input body without a frame, for embedding in a caller-owned layout. -/
-def textInputBody (config : TextInputConfig) (state : TextInputState)
-    (focused : Bool) : Text :=
+def textInputBody
+    (config : TextInputConfig)
+    (state : TextInputState)
+    (focused : Bool)
+    : Text :=
   if config.width == 0 then Text.empty else
     let allCharacters := state.value.toList
     let cursor := clampCursor state
@@ -516,8 +652,11 @@ def textInputBody (config : TextInputConfig) (state : TextInputState)
         config.textStyle
 
 /-- Render a single-line input with an optional visible cursor. -/
-def renderTextInput (config : TextInputConfig) (state : TextInputState)
-    (focused : Bool := false) : Text :=
+def renderTextInput
+    (config : TextInputConfig)
+    (state : TextInputState)
+    (focused : Bool := false)
+    : Text :=
   withLabel config.label ++ Text.plain "[" ++ textInputBody config state focused ++ Text.plain "]"
 
 /-- State for an integer slider. Values are clamped to the configured range. -/
@@ -546,11 +685,18 @@ instance : Inhabited SliderConfig := ⟨{}⟩
 private def sliderMax (config : SliderConfig) : Nat := max config.min config.max
 
 /-- Clamp a slider value, treating a reversed range as a single-value range. -/
-def sliderValue (config : SliderConfig) (state : SliderState) : Nat :=
+def sliderValue
+    (config : SliderConfig)
+    (state : SliderState)
+    : Nat :=
   min (sliderMax config) (max config.min state.value)
 
 /-- Apply one key to an integer slider. -/
-def updateSlider (config : SliderConfig) (key : Key) (state : SliderState) : SliderState :=
+def updateSlider
+    (config : SliderConfig)
+    (key : Key)
+    (state : SliderState)
+    : SliderState :=
   let value := sliderValue config state
   let high := sliderMax config
   match key with
@@ -559,7 +705,10 @@ def updateSlider (config : SliderConfig) (key : Key) (state : SliderState) : Sli
   | _ => { value }
 
 /-- Render an integer slider as a terminal bar and its current value. -/
-def renderSlider (config : SliderConfig) (state : SliderState) : Text :=
+def renderSlider
+    (config : SliderConfig)
+    (state : SliderState)
+    : Text :=
   let value := sliderValue config state
   let high := sliderMax config
   let span := high - config.min
@@ -588,23 +737,34 @@ structure CheckboxConfig where
 instance : Inhabited CheckboxConfig := ⟨{}⟩
 
 /-- Toggle a checkbox on activation. -/
-def updateCheckbox (key : Key) (state : CheckboxState) : CheckboxState :=
+def updateCheckbox
+    (key : Key)
+    (state : CheckboxState)
+    : CheckboxState :=
   match key with
   | .char ' ' | .enter => { checked := !state.checked }
   | _ => state
 
 /-- Render a checkbox with its label. -/
-def renderCheckbox (config : CheckboxConfig) (state : CheckboxState) : Text :=
+def renderCheckbox
+    (config : CheckboxConfig)
+    (state : CheckboxState)
+    : Text :=
   Text.plain "[" ++ (if state.checked then config.checkedText else config.uncheckedText) ++
     Text.plain "]" ++ afterFrameLabel config.label
 
 /-- Whether a key activates a button. -/
-def buttonActivated : Key → Bool
+def buttonActivated
+    : Key →
+      Bool
   | .enter | .char ' ' => true
   | _ => false
 
 /-- Render a terminal button, highlighting it when focused. -/
-def renderButton (label : Text) (focused : Bool := false) : Text :=
+def renderButton
+    (label : Text)
+    (focused : Bool := false)
+    : Text :=
   let content := Text.plain "[" ++ label ++ Text.plain "]"
   if focused then Text.styled content.plainText Style.reverse else content
 
