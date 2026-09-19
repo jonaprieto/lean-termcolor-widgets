@@ -29,7 +29,9 @@ def renderLine
     :=
   IO.print (Text.render target (text ++ Text.plain "\n"))
 
-def main : IO Unit := do
+def main
+    : IO Unit
+    := do
   let target ← TermColor.target
   renderLine target (Text.styled "termcolor-widgets" (Style.bold <+> Style.fg demoPalette.cyan))
   renderLine target (Text.plain "Pure CLI display rendering")

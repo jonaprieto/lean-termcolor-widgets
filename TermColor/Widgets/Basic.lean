@@ -131,7 +131,9 @@ def indeterminateProgressBar
   withLabel state.label ++ bar
 
 /-- Default braille spinner frames. The caller advances the frame index. -/
-def defaultSpinnerFrames : List Text :=
+def defaultSpinnerFrames
+    : List Text
+    :=
   [ Text.plain "⠋", Text.plain "⠙", Text.plain "⠹", Text.plain "⠸", Text.plain "⠼"
   , Text.plain "⠴", Text.plain "⠦", Text.plain "⠧", Text.plain "⠇", Text.plain "⠏" ]
 
@@ -375,7 +377,9 @@ structure CollapsibleRender where
   hitHeaderHeight : Nat
   deriving BEq, DecidableEq, Repr
 
-instance : Inhabited CollapsibleRender :=
+instance
+    : Inhabited CollapsibleRender
+    :=
   ⟨{ text := Text.empty, lineCount := 0, hitHeaderHeight := 0 }⟩
 
 private def keyIn (key : Key) (keys : List Key) : Bool := keys.any (· == key)
